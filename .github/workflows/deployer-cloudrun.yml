@@ -1,0 +1,46 @@
+name: Deploy Microservices to Cloud Run
+
+on:
+  push:
+    tags:
+      - 'v*'               # Ej: v1.0.0
+    branches:
+      - main
+      - staging
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [transcribe, extract, diagnose]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Deploy to Cloud Run
+      run: |
+        VERSION_TAG="${GITHUB_REF##*/}"
+        SERVICE_NAME="${{ matrix.service }}-${VERSION_TAG}"
+        SERVICE_DIR="backend/${{ matrix.service }}"
+
+        echo "Deploying $SERVICE_NAME from $SERVICE_DIR..."
+
+        gcloud run deploy $SERVICE_NAME \
+          --source $SERVICE_DIR \
+          --region $REGION \
+          --platform managed \
+          --allow-unauthenticated \
+          --set-env-vars=OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
