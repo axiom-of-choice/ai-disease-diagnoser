@@ -1,37 +1,50 @@
 import streamlit as st
 import requests
 
-TRANSCRIBE_URL = "https://<transcribe-url>/transcribe"
-EXTRACT_URL = "https://<extract-url>/extract"
-DIAGNOSE_URL = "https://<diagnose-url>/diagnose"
+API_BASE = "https://<TUSERVICIO>.cloudfunctions.net/api"
 
-st.title("Asistente Médico AI")
+st.set_page_config(page_title="Procesador Médico", layout="centered")
 
-text_input = st.text_area("Texto clínico o motivo de consulta")
-audio_url = st.text_input("URL de audio (opcional)")
+st.title("🩺 Procesamiento Médico con LLMs")
 
-if st.button("Procesar"):
+with st.form("input_form"):
+    st.subheader("1. Ingresa datos")
+    audio_url = st.text_input("🔗 URL del audio")
+    texto_manual = st.text_area("📝 O escribe texto manualmente")
+
+    submitted = st.form_submit_button("Procesar")
+
+if submitted:
     if audio_url:
-        with st.spinner("Transcribiendo audio..."):
-            response = requests.post(TRANSCRIBE_URL, json={"audio_url": audio_url})
-            text_input = response.json()["transcription"]
+        with st.spinner("🔄 Transcribiendo audio..."):
+            response = requests.post(f"{API_BASE}/transcribe", json={"audio_url": audio_url})
+            if response.ok:
+                transcripcion = response.json()["transcription"]
+                st.success("✅ Transcripción completada")
+                st.text_area("🗒 Transcripción", transcripcion, height=150)
+            else:
+                st.error("❌ Error al transcribir audio")
+                st.stop()
+    else:
+        transcripcion = texto_manual
 
-    with st.spinner("Extrayendo información médica..."):
-        r2 = requests.post(EXTRACT_URL, json={"text": text_input})
-        structured = r2.json()
+    with st.spinner("📋 Extrayendo información médica..."):
+        response = requests.post(f"{API_BASE}/extract", json={"text": transcripcion})
+        if response.ok:
+            data = response.json()
+            st.success("✅ Información médica extraída")
 
-    with st.spinner("Generando diagnóstico..."):
-        r3 = requests.post(DIAGNOSE_URL, json=structured)
-        result = r3.json()
+            st.json(data)
+        else:
+            st.error("❌ Error al extraer información médica")
+            st.stop()
 
-    st.subheader("Datos del Paciente")
-    st.json(structured)
-
-    st.subheader("Diagnóstico")
-    st.write(result.get("diagnosis", "No disponible"))
-
-    st.subheader("Tratamiento")
-    st.write(result.get("treatment", "No disponible"))
-
-    st.subheader("Recomendaciones")
-    st.write(result.get("recommendations", "No disponible"))
+    with st.spinner("💡 Generando diagnóstico..."):
+        response = requests.post(f"{API_BASE}/diagnose", json=data)
+        if response.ok:
+            diagnostico = response.json()["diagnosis"]
+            st.success("✅ Diagnóstico generado")
+            st.markdown("### 🧾 Diagnóstico y Recomendaciones")
+            st.write(diagnostico)
+        else:
+            st.error("❌ Error al generar diagnóstico")

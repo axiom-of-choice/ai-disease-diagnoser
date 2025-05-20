@@ -1,10 +1,21 @@
-import openai
-import os
+from common.openai_client import client
+from openai import OpenAI
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+def extract(text: str):
+    """
+    Extracts medical information from a given text using OpenAI's GPT-4 model.
+    """
+    
+    # Initialize OpenAI client
+    
+    # Call the function to extract medical information
+    extracted_info = extract_medical_info(text, client)
+    
+    return extracted_info
 
-def extract_medical_info(text):
-    response = openai.ChatCompletion.create(
+
+def extract_medical_info(text: str, client: OpenAI) -> dict:
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "Extrae información médica del texto como JSON."},
@@ -33,24 +44,3 @@ def extract_medical_info(text):
         function_call={"name": "extract_info"}
     )
     return response["choices"][0]["message"]["function_call"]["arguments"]
-
-def generate_diagnosis(info):
-    prompt = f"""
-Paciente: {info['patient']}
-Síntomas: {info['symptoms']}
-Motivo de consulta: {info['reasonForVisit']}
-
-Genera:
-- Diagnóstico
-- Tratamiento
-- Recomendaciones
-"""
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return {
-        "diagnosis": "Posible diagnóstico de ejemplo",
-        "treatment": "Tratamiento de ejemplo",
-        "recommendations": "Recomendaciones de ejemplo"
-    }
