@@ -1,25 +1,20 @@
 from functools import wraps
 from flask import request, jsonify
-from pydantic import ValidationError
+from pydantic import ValidationError, BaseModel
 import time
 
-def validate_json(model):
+def validate_model(model: BaseModel):
     """
-    Decorator to validate incoming JSON against a Pydantic model.
-    Pass the Pydantic model class as the argument.
+    Decorator to validate JSON input against a Pydantic model.
     """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            data = request.get_json()
-            if not data:
-                return jsonify({"error": "Invalid JSON"}), 400
             try:
-                validated = model(**data)
+                validated_input = model.model_validate(request.json)
+                return func(validated_input)
             except ValidationError as e:
-                return jsonify({"error": e.errors()}), 400
-            # Pass the validated model instance to the route handler
-            return func(validated, *args, **kwargs)
+                raise e
         return wrapper
     return decorator
 

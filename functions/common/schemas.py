@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List
+import enum
 
 class Patient(BaseModel):
     name: str
@@ -21,3 +22,11 @@ class DiagnosisOutput(BaseModel):
     diagnostico: str
     tratamiento: str
     recomendaciones: str
+    
+class ValidExtensions(enum.Enum):
+    mp3 = "mp3"
+    mp4 = "mp4"
+    mpeg = "mpeg"
+    mpga = "mpga"
+    wav = "wav"
+    webm = "webm"
