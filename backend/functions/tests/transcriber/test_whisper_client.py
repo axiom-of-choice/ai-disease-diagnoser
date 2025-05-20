@@ -1,7 +1,7 @@
 import pytest
 import requests
 from unittest.mock import patch, mock_open
-from whisper_client import transcribe_audio
+from transcriber.audio_utils import transcribe_audio
 
 # Simular contenido de archivo de audio
 DUMMY_AUDIO_CONTENT = b"fake audio content"
