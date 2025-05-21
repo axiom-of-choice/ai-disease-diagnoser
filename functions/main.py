@@ -2,7 +2,7 @@ from transcriber import transcribe
 from extractor import extract
 from diagnoser import diagnose
 from common.schemas import AudioTranscriptionInput, Response, AudioTranscriptionOutput, MedicalInput, DiagnosisOutput
-from common.utils import get_truncated_traceback
+from common.utils import get_truncated_traceback, check_and_return_error
 
 
 import json
@@ -198,6 +198,9 @@ def process_medical_data(request: Request) -> https_fn.Response:
     try:
         if audio_url:
             transcribed_text = transcribe(AudioTranscriptionInput(audio_url=audio_url))
+            error_response = check_and_return_error(transcribed_text)
+            if error_response:
+                return error_response
             text_to_process = AudioTranscriptionOutput(**transcribed_text)
         elif text_input:
             text_to_process = AudioTranscriptionOutput(text=text_input)
@@ -209,9 +212,16 @@ def process_medical_data(request: Request) -> https_fn.Response:
         logger.info(f"Texto a procesar: {text_to_process}")
         extracted_info = extract(text_to_process)
         logger.info(f"Información extraída: {extracted_info}")
+        error_response = check_and_return_error(extracted_info)
+        if error_response:
+            return error_response
 
         # Paso 3: Generación de diagnóstico
         diagnosis_report = diagnose(MedicalInput(**extracted_info))
+        error_response = check_and_return_error(diagnosis_report)
+        if error_response:
+            return error_response
+
         status = "success"
 
         response_data = {
@@ -230,7 +240,7 @@ def process_medical_data(request: Request) -> https_fn.Response:
         error = str(e)
         response_data = {
             "status": status,
-            "error": error, 
+            "error": {"message": error}, 
             "transcribed_text": transcribed_text.get("text", ""),
         }
         response = Response(**response_data).model_dump_json()
@@ -242,7 +252,7 @@ def process_medical_data(request: Request) -> https_fn.Response:
         error = str(e)
         response_data = {
             "status": status,
-            "error": error, 
+            "error": {"message": error}, 
             "transcribed_text": transcribed_text.get("text", ""),
         }
         response = Response(**response_data).model_dump_json()

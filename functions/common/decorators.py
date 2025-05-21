@@ -9,21 +9,23 @@ logger = setup_logger(__name__)
 
 def validate_input(model: BaseModel):
     """
-    Decorator to validate JSON input against a Pydantic model.
+    Decorator to validate input against a Pydantic model.
+    Returns a dict with error details on validation failure.
     """
     def decorator(func):
         @wraps(func)
         def wrapper(arg, *args, **kwargs):
             try:
                 logger.info(f"Validating input with model: {model.__name__}")
-                # For Pydantic v2, use model(**request.get_json())
                 validated_input: BaseModel = model.model_validate(arg)
-            except InvalidInputError as e:
-                # Return error response immediately, do NOT call the function
-                logger.error(f"Invalid input: {e.errors()}")
-                logger.debug(f"Invalid input details: {e}")
-                return jsonify({"error": "Invalid input", "details": e.errors()}), 400
-            return func(validated_input)
+            except (InvalidInputError, ValidationError) as e:
+                logger.error(f"Invalid input: {e.errors() if hasattr(e, 'errors') else str(e)}")
+                return {
+                    "error": "Invalid input",
+                    "function": func.__name__,
+                    "details": e.errors() if hasattr(e, 'errors') else str(e)
+                }
+            return func(validated_input, *args, **kwargs)
         return wrapper
     return decorator
 
@@ -34,16 +36,18 @@ def validate_output(model: BaseModel):
             logger.info(f"Validating output with model: {model.__name__}")
             result = func(*args, **kwargs)
             logger.info(f"Function result: {result}")
-            # If the result is a tuple (response, status), just return it directly
             if isinstance(result, tuple):
                 return result
             try:
                 validated: BaseModel = model(**result)
                 return validated.model_dump()
-            except InvalidOutputError as e:
-                logger.error(f"Invalid output: {e.errors()}")
-                logger.debug(f"Invalid output details: {e}")
-                return jsonify({"error": "Invalid output", "details": str(e)}), 500
+            except (InvalidOutputError, ValidationError) as e:
+                logger.error(f"Invalid output: {e.errors() if hasattr(e, 'errors') else str(e)}")
+                return {
+                    "error": "Invalid output",
+                    "function": func.__name__,
+                    "details": e.errors() if hasattr(e, 'errors') else str(e)
+                }
         return wrapper
     return decorator
 

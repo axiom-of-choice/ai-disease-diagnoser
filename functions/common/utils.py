@@ -1,6 +1,8 @@
 import uuid
-from common.schemas import ValidExtensions
+from common.schemas import ValidExtensions, ErrorResponse, Response
 import traceback
+import json
+from firebase_functions import https_fn
 
 from config import setup_logger
 
@@ -72,3 +74,25 @@ def get_truncated_traceback(exc, max_lines=100, max_chars=1000):
     if len(truncated_tb) > max_chars:
         truncated_tb = '...\n' + truncated_tb[-max_chars:]
     return truncated_tb
+
+def check_and_return_error(result) -> https_fn.Response:
+    """
+    Checks if the result is an error dict and returns an HTTP response if so.
+    Returns None if no error is found.
+    """
+    if isinstance(result, dict) and "error" in result:
+        message = result.get("error", "Unknown error")
+        function = result.get("function", "Unknown function")
+        details = result.get("details", "No details provided")
+        error_response = ErrorResponse(
+            message = message,
+            function= function,
+            details = details
+        )
+        response = Response(
+            status="error",
+            error=error_response
+        )
+        logger.error(f"Error response: {response}")
+        return https_fn.Response(response.model_dump_json(), status=400, mimetype="application/json")
+    return None

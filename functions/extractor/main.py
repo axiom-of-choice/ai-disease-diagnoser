@@ -9,8 +9,8 @@ import json
 logger = setup_logger(__name__)
 
 @functions_framework.http
-@validate_output(MedicalInput)
 @validate_input(AudioTranscriptionOutput)
+@validate_output(MedicalInput)
 def extract(request: AudioTranscriptionOutput) -> MedicalInput:
     """
     Usa el modelo de OpenAI para extraer datos clínicos estructurados desde texto libre.
