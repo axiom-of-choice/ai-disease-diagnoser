@@ -8,14 +8,14 @@ TEXTO_CLINICO
 Devuelve un objeto JSON con la siguiente estructura:
 
 {
-  "identificacion_paciente": {
-    "nombre": "Nombre completo del paciente, si está disponible",
-    "edad": "Edad del paciente en años, si está disponible",
-    "numero_identificacion": "Número de identificación, si aparece",
-    "genero": "Masculino, Femenino u Otro, si está indicado"
+  "patient": {
+    "name": "Nombre completo del paciente, si está disponible",
+    "age": "Edad del paciente en años, si está disponible",
+    "id": "Número de identificación, si aparece",
+    "gender": "Masculino, Femenino u Otro, si está indicado"
   },
-  "motivo_consulta": "Breve descripción del motivo principal por el cual el paciente acude a consulta.",
-  "sintomas": [
+  "reason_for_visit": "Breve descripción del motivo principal por el cual el paciente acude a consulta.",
+  "symptoms": [
     "Lista de síntomas reportados o identificados en el texto, en lenguaje médico estandarizado si es posible"
   ]
 }

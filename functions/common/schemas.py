@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import enum
 
 class Patient(BaseModel):
     name: str
-    age: int
-    id: str
-    gender: str
+    age: Optional[int]
+    id: Optional[str]
+    gender: Optional[str]
 
 class MedicalInput(BaseModel):
     patient: Patient

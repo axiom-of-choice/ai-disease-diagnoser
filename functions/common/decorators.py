@@ -14,7 +14,7 @@ def validate_input(model: BaseModel):
                 validated_input = model.model_validate(request.json)
                 return func(validated_input)
             except ValidationError as e:
-                raise e
+                return jsonify({"error": "Invalid input", "details": e.errors()}), 400
         return wrapper
     return decorator
 
@@ -29,7 +29,7 @@ def validate_output(model: BaseModel):
                 return validated.model_dump()
             except Exception as e:
                 # Handle invalid response
-                raise e
+                return jsonify({"error": "Invalid output", "details": str(e)}), 500
         return wrapper
     return decorator
 
