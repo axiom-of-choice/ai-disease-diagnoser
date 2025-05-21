@@ -14,14 +14,14 @@ Devuelve un objeto JSON con la siguiente estructura:
     "id": "Número de identificación, si aparece",
     "gender": "Masculino, Femenino u Otro, si está indicado"
   },
-  "reason_for_visit": "Breve descripción del motivo principal por el cual el paciente acude a consulta.",
+  "reason_for_visit": "Breve descripción del motivo principal por el cual el paciente acude a consulta, si está disponible y claro.",
   "symptoms": [
-    "Lista de síntomas reportados o identificados en el texto, en lenguaje médico estandarizado si es posible"
+    "Lista de síntomas reportados o identificados en el texto, en lenguaje médico estandarizado, si esta disponible y claro.",
   ]
 }
 
 Reglas:
-No inventes información que no esté presente en el texto.
+No inventes información que no esté presente claramente en el texto.
 Si un campo no está disponible, déjalo como null.
 Usa lenguaje claro y preciso, evita redundancias.
 Lista solo síntomas, no diagnósticos.

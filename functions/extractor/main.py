@@ -1,6 +1,6 @@
 from common.openai_client import client
 from common.utils import load_prompt
-from config import EXTRACT_PROMPT_PATH, TEXTO_CLINICO, setup_logger
+from config import EXTRACT_PROMPT_PATH, TEXTO_CLINICO, setup_logger, GPT_MODEL
 from common.schemas import AudioTranscriptionOutput, MedicalInput
 import functions_framework
 from common.decorators import validate_input, validate_output
@@ -22,9 +22,9 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
     logger.info("Llamando a OpenAI para la extracción de datos clínicos...")
     try:
         response = client.chat.completions.create(
-            model="gpt-4",  # Cambiar a "gpt-3.5-turbo" si se desea
+            model=GPT_MODEL,
             messages=[{"role": "user", "content": prompt}],
-            # response_format="json",
+            response_format={"type": "json_object"},
             temperature=0.2,
             max_tokens=800
         )

@@ -19,6 +19,8 @@ EXTRACT_PROMPT_PATH = "extractor/prompt.txt"
 TEXTO_CLINICO = "TEXTO_CLINICO"
 MEDICAL_INPUT = "MEDICAL_INPUT"
 DIAGNOSIS_PROMPT_PATH = "diagnoser/prompt.txt"
+GPT_MODEL = "gpt-3.5-turbo-1106"
+TRANSCRIBE_MODEL = "gpt-4o-transcribe"
 
 def setup_logger(name):
     logger = logging.getLogger(name)

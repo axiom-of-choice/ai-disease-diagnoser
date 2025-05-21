@@ -28,7 +28,7 @@
         "function": "process_medical_data"
       },
       {
-        "source": "/api/health",
+        "source": "/health",
         "function": "health"
       },
       { "source": "**", "function": "not_found" }

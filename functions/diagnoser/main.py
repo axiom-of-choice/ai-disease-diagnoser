@@ -4,7 +4,7 @@ from common.openai_client import client
 from common.decorators import validate_input, validate_output
 from common.utils import load_prompt
 from common.schemas import MedicalInput, DiagnosisOutput
-from config import DIAGNOSIS_PROMPT_PATH, setup_logger, MEDICAL_INPUT
+from config import DIAGNOSIS_PROMPT_PATH, setup_logger, MEDICAL_INPUT, GPT_MODEL
 import json
 
 
@@ -28,7 +28,7 @@ def diagnose(request: MedicalInput) -> str:
 
     logger.info("Llamando a OpenAI para el diagnóstico...")
     response = client.chat.completions.create(
-        model="gpt-4",
+        model=GPT_MODEL,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7
     )

@@ -1,5 +1,5 @@
 from common.utils import get_file_extension, validate_extension
-from config import setup_logger, TMP_FOLDER
+from config import setup_logger, TMP_FOLDER, TRANSCRIBE_MODEL
 import functions_framework
 from common.schemas import AudioTranscriptionInput, AudioTranscriptionOutput
 from common.utils import write_file, generate_uuid
@@ -50,7 +50,7 @@ def transcribe_audio(filepath: str) -> Dict[str, str]:
         logger.info("Transcribing audio...")
         try:
             response = client.audio.transcriptions.create(
-                model="gpt-4o-transcribe",
+                model=TRANSCRIBE_MODEL,
                 file=audio_file
             )
         except Exception as e:
