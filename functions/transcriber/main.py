@@ -1,11 +1,12 @@
-from .audio_utils import transcribe_audio, get_file_extension, validate_extension
+from common.utils import get_file_extension, validate_extension
 from config import setup_logger, TMP_FOLDER
 import functions_framework
 from common.schemas import AudioTranscriptionInput, AudioTranscriptionOutput
-from common.decorators import validate_input, validate_output
 from common.utils import write_file, generate_uuid
+from common.decorators import validate_input, validate_output
 import requests
 from typing import Dict
+from common.openai_client import client
 
 
 
@@ -36,3 +37,23 @@ def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
     logger.info("Transcribing audio...")
     result = transcribe_audio(file_path)
     return result
+
+def transcribe_audio(filepath: str) -> Dict[str, str]:
+    """
+    Transcribe audio file to text using OpenAI's Whisper model.
+    """
+    logger.info(f"Reading audio file from: {filepath}")
+    with open(filepath, "rb") as audio_file:
+        logger.info("Transcribing audio...")
+        try:
+            response = client.audio.transcriptions.create(
+                model="gpt-4o-transcribe",
+                file=audio_file
+            )
+        except Exception as e:
+            logger.error(f"Error during transcription: {e}")
+            return {"error": str(e)}
+        
+    logger.info(f"Transcription response: {response}")
+    # response = AudioTranscriptionOutput.model_validate(response.model_dump())
+    return response.model_dump()

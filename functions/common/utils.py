@@ -1,4 +1,9 @@
 import uuid
+from common.schemas import ValidExtensions
+
+from config import setup_logger
+
+logger = setup_logger(__name__)
 
 def normalize_text(text: str) -> str:
     return text.strip().lower()
@@ -30,3 +35,26 @@ def load_prompt(path: str, texto_clinico: str, replace_text: str) -> str:
     except FileNotFoundError:
         raise FileNotFoundError(f"Prompt file not found: {path}")
     return prompt_base.replace(replace_text, texto_clinico)
+
+
+def validate_extension(extension: str) -> bool:
+    """
+    Validate the audio file extension.
+    """
+    logger.info(f"Validating file extension: {extension}")
+    if extension not in [ext.value for ext in ValidExtensions]:
+        logger.error(f"Invalid file extension: {extension}")
+        return False
+    return True
+
+def get_file_extension(filepath: str) -> str:
+    """
+    Get the file extension from the file path.
+    """
+    logger.info(f"Getting file extension from: {filepath}")
+    try:
+        ext = filepath.split("/")[-1]
+    except Exception as e:
+        logger.error(f"Error getting file extension: {e}")
+        return None
+    return ext
