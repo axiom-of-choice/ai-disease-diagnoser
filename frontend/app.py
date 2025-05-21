@@ -45,7 +45,7 @@ else:
                 st.text(result)
                 st.stop()
             st.success("Texto procesado con éxito")
-            st.json(result)
+            st.text(result)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error al procesar el texto: {e}")
             st.text(result)

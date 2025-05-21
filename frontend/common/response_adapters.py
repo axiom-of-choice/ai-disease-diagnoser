@@ -40,8 +40,10 @@ def handle_success_response(response: DiagnosisResponse) -> str:
     Handle the success response from the transcription function.
     """
     text_combined = f"""
-    Diagnostico: {response.diagnosis_report.get("diagnostic")}
-    Tratamiento: {response.diagnosis_report.get("treatment")}
+    Hola! {response.extracted_info.get("patient").get("name")}, soy el asistente médico. \n
+    Aquí tienes el diagnóstico basado en la información proporcionada: \n
+    Diagnostico: {response.diagnosis_report.get("diagnostic")} \n
+    Tratamiento: {response.diagnosis_report.get("treatment")} \n
     Recomendaciones: {response.diagnosis_report.get("recommendations")}
     """
     return text_combined
