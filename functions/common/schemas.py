@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import enum
 
 class Patient(BaseModel):
@@ -27,8 +27,8 @@ class DiagnosisOutput(BaseModel):
 class Response(BaseModel):
     status: str
     transcribed_text: Optional[str] = None
-    extracted_info: Optional[str] = None
-    diagnosis_report: Optional[str] = None
+    extracted_info: Optional[Dict[str, Any]] = None
+    diagnosis_report: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
     
 class ValidExtensions(enum.Enum):

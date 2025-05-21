@@ -193,7 +193,7 @@ def process_medical_data(request: Request) -> https_fn.Response:
     audio_url = data.get("audio_url")
     text_input = data.get("text_input")
 
-    transcribed_text = ""
+    transcribed_text = {"text": text_input}
     status = "failed"
     try:
         if audio_url:
@@ -216,7 +216,7 @@ def process_medical_data(request: Request) -> https_fn.Response:
 
         response_data = {
             "status": status,
-            "transcribed_text": transcribed_text,
+            "transcribed_text": transcribed_text.get("text", ""),
             "extracted_info": extracted_info,
             "diagnosis_report": diagnosis_report
         }
