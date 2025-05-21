@@ -1,46 +1,35 @@
 from common.openai_client import client
-from openai import OpenAI
+from common.utils import load_prompt
+from config import EXTRACT_PROMPT_PATH
+from common.schemas import AudioTranscriptionOutput
+import functions_framework
+from common.decorators import validate_model
 
-def extract(text: str):
+# Configura tu clave de API desde una variable de entorno
+
+@functions_framework.http
+@validate_model(AudioTranscriptionOutput)
+def extract(request: AudioTranscriptionOutput) -> str:
     """
-    Extracts medical information from a given text using OpenAI's GPT-4 model.
+    Usa el modelo de OpenAI para extraer datos clínicos estructurados desde texto libre.
     """
-    
-    # Initialize OpenAI client
-    
-    # Call the function to extract medical information
-    extracted_info = extract_medical_info(text, client)
-    
-    return extracted_info
+    text = request.model_dump().get("text")
+    prompt = load_prompt(EXTRACT_PROMPT_PATH, text)
 
-
-def extract_medical_info(text: str, client: OpenAI) -> dict:
     response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Extrae información médica del texto como JSON."},
-            {"role": "user", "content": text}
-        ],
-        functions=[{
-            "name": "extract_info",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "patient": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "age": {"type": "integer"},
-                            "id": {"type": "string"}
-                        },
-                        "required": ["name", "age", "id"]
-                    },
-                    "symptoms": {"type": "array", "items": {"type": "string"}},
-                    "reasonForVisit": {"type": "string"}
-                },
-                "required": ["patient", "symptoms", "reasonForVisit"]
-            }
-        }],
-        function_call={"name": "extract_info"}
+        model="gpt-4",  # Cambiar a "gpt-3.5-turbo" si se desea
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
+        max_tokens=800
     )
-    return response["choices"][0]["message"]["function_call"]["arguments"]
+
+    return response["choices"][0]["message"]["content"]
+
+# Ejemplo de uso
+if __name__ == "__main__":
+    texto = """
+    Paciente femenina de 34 años, identificada como Laura Medina, se presenta con dolor de cabeza constante, 
+    visión borrosa y náuseas. DNI: 11223344. El motivo de la consulta es que los síntomas han empeorado en los últimos días.
+    """
+    resultado = extract(texto)
+    print(resultado)

@@ -1,50 +1,18 @@
 import streamlit as st
 import requests
 
-API_BASE = "https://<TUSERVICIO>.cloudfunctions.net/api"
+st.title("Procesamiento Médico Inteligente")
 
-st.set_page_config(page_title="Procesador Médico", layout="centered")
+option = st.radio("Selecciona una entrada:", ("Link de audio", "Texto libre"))
 
-st.title("🩺 Procesamiento Médico con LLMs")
+if option == "Link de audio":
+    audio_url = st.text_input("Pega el enlace del audio")
+    if st.button("Procesar audio"):
+        response = requests.post("https://REGION-PROJECT.cloudfunctions.net/process_audio", json={"audio_url": audio_url})
+        st.json(response.json())
 
-with st.form("input_form"):
-    st.subheader("1. Ingresa datos")
-    audio_url = st.text_input("🔗 URL del audio")
-    texto_manual = st.text_area("📝 O escribe texto manualmente")
-
-    submitted = st.form_submit_button("Procesar")
-
-if submitted:
-    if audio_url:
-        with st.spinner("🔄 Transcribiendo audio..."):
-            response = requests.post(f"{API_BASE}/transcribe", json={"audio_url": audio_url})
-            if response.ok:
-                transcripcion = response.json()["transcription"]
-                st.success("✅ Transcripción completada")
-                st.text_area("🗒 Transcripción", transcripcion, height=150)
-            else:
-                st.error("❌ Error al transcribir audio")
-                st.stop()
-    else:
-        transcripcion = texto_manual
-
-    with st.spinner("📋 Extrayendo información médica..."):
-        response = requests.post(f"{API_BASE}/extract", json={"text": transcripcion})
-        if response.ok:
-            data = response.json()
-            st.success("✅ Información médica extraída")
-
-            st.json(data)
-        else:
-            st.error("❌ Error al extraer información médica")
-            st.stop()
-
-    with st.spinner("💡 Generando diagnóstico..."):
-        response = requests.post(f"{API_BASE}/diagnose", json=data)
-        if response.ok:
-            diagnostico = response.json()["diagnosis"]
-            st.success("✅ Diagnóstico generado")
-            st.markdown("### 🧾 Diagnóstico y Recomendaciones")
-            st.write(diagnostico)
-        else:
-            st.error("❌ Error al generar diagnóstico")
+else:
+    texto_libre = st.text_area("Escribe el texto del paciente")
+    if st.button("Procesar texto"):
+        response = requests.post("https://REGION-PROJECT.cloudfunctions.net/process_text", json={"text": texto_libre})
+        st.json(response.json())

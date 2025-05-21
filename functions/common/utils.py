@@ -19,3 +19,11 @@ def read_file(file_path: str) -> bytes:
         
 def generate_uuid() -> str:
     return str(uuid.uuid4())
+
+def load_prompt(path, texto_clinico, replace_text: str):
+    """
+    Carga el prompt desde un archivo de texto y reemplaza el marcador con el texto clínico.
+    """
+    with open(path, "r", encoding="utf-8") as file:
+        prompt_base = file.read()
+    return prompt_base.replace(f"{replace_text}", texto_clinico)
