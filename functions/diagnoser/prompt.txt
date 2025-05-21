@@ -1,0 +1,15 @@
+Basado en los siguientes datos médicos:
+
+MEDICAL_INPUT
+
+Devuelve un objeto JSON con la siguiente estructura:
+
+{
+"diagnostic": "Diagnóstico médico basado en los síntomas y signos clínicos presentados por el paciente.",
+"treatment": "Descripción del tratamiento recomendado o prescrito, incluyendo medicamentos y procedimientos.",
+"recommendations": "Recomendaciones adicionales para el paciente, como cambios en el estilo de vida, seguimiento médico o pruebas adicionales."
+}
+
+Devuelve todo de manera clar y profesional.
+Usa un tono profesional y claro. No uses lenguaje médico complejo, sino que explica los términos médicos de forma sencilla. No uses jerga médica. No uses abreviaturas. No uses términos técnicos sin explicarlos.
+No uses nombres de medicamentos específicos. Usa nombres genéricos y explica su función.

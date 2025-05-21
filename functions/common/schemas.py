@@ -4,9 +4,9 @@ import enum
 
 class Patient(BaseModel):
     name: str
-    age: Optional[int]
+    age: int
+    gender: str
     id: Optional[str]
-    gender: Optional[str]
 
 class MedicalInput(BaseModel):
     patient: Patient
@@ -20,9 +20,9 @@ class AudioTranscriptionOutput(BaseModel):
     text: str
 
 class DiagnosisOutput(BaseModel):
-    diagnostico: str
-    tratamiento: str
-    recomendaciones: str
+    diagnostic: str
+    treatment: str
+    recommendations: str
     
 class ValidExtensions(enum.Enum):
     mp3 = "mp3"

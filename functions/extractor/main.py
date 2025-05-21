@@ -40,11 +40,3 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
 
     return response
 
-# Ejemplo de uso
-if __name__ == "__main__":
-    texto = """
-    Paciente femenina de 34 años, identificada como Laura Medina, se presenta con dolor de cabeza constante, 
-    visión borrosa y náuseas. DNI: 11223344. El motivo de la consulta es que los síntomas han empeorado en los últimos días.
-    """
-    resultado = extract(texto)
-    print(resultado)

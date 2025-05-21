@@ -24,6 +24,9 @@ def load_prompt(path: str, texto_clinico: str, replace_text: str) -> str:
     """
     Carga el prompt desde un archivo de texto y reemplaza el marcador con el texto clínico.
     """
-    with open(path, "r", encoding="utf-8") as file:
-        prompt_base = file.read()
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            prompt_base = file.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Prompt file not found: {path}")
     return prompt_base.replace(replace_text, texto_clinico)

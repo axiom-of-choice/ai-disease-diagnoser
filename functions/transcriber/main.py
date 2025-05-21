@@ -1,8 +1,8 @@
 from .audio_utils import transcribe_audio, get_file_extension, validate_extension
 from config import setup_logger, TMP_FOLDER
 import functions_framework
-from common.schemas import AudioTranscriptionInput
-from common.decorators import validate_input
+from common.schemas import AudioTranscriptionInput, AudioTranscriptionOutput
+from common.decorators import validate_input, validate_output
 from common.utils import write_file, generate_uuid
 import requests
 from typing import Dict
@@ -12,6 +12,7 @@ from typing import Dict
 logger = setup_logger(__name__)
 
 @functions_framework.http
+@validate_output(AudioTranscriptionOutput)
 @validate_input(AudioTranscriptionInput)
 def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
     audio_url = request.model_dump().get("audio_url")
