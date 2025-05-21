@@ -19,6 +19,10 @@ def diagnose(request: MedicalInput) -> str:
     logger.debug(request)
     # Convertir el input a un string
     medical_info = info_parser(request)
+    logger.info(f"Información médica: {medical_info}")
+    
+    if not isinstance(medical_info, str):
+        return {"error": "Invalid input format"}
     
     prompt = load_prompt(DIAGNOSIS_PROMPT_PATH, medical_info, MEDICAL_INPUT)
 

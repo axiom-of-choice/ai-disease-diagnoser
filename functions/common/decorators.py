@@ -11,10 +11,12 @@ def validate_input(model: BaseModel):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
-                validated_input = model.model_validate(request.json)
-                return func(validated_input)
+                # For Pydantic v2, use model(**request.get_json())
+                validated_input = model(**request.get_json())
             except ValidationError as e:
+                # Return error response immediately, do NOT call the function
                 return jsonify({"error": "Invalid input", "details": e.errors()}), 400
+            return func(validated_input)
         return wrapper
     return decorator
 
@@ -23,12 +25,13 @@ def validate_output(model: BaseModel):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
+            # If the result is a tuple (response, status), just return it directly
+            if isinstance(result, tuple):
+                return result
             try:
-                # Validate the response using a Pydantic model
                 validated: BaseModel = model(**result)
                 return validated.model_dump()
             except Exception as e:
-                # Handle invalid response
                 return jsonify({"error": "Invalid output", "details": str(e)}), 500
         return wrapper
     return decorator
