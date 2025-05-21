@@ -2,6 +2,7 @@ from functools import wraps
 from flask import request, jsonify
 from pydantic import ValidationError, BaseModel
 import time
+from .exceptions import InvalidInputError, InvalidOutputError
 
 def validate_input(model: BaseModel):
     """
@@ -13,7 +14,7 @@ def validate_input(model: BaseModel):
             try:
                 # For Pydantic v2, use model(**request.get_json())
                 validated_input = model(**request.get_json())
-            except ValidationError as e:
+            except InvalidInputError as e:
                 # Return error response immediately, do NOT call the function
                 return jsonify({"error": "Invalid input", "details": e.errors()}), 400
             return func(validated_input)
@@ -31,7 +32,7 @@ def validate_output(model: BaseModel):
             try:
                 validated: BaseModel = model(**result)
                 return validated.model_dump()
-            except Exception as e:
+            except InvalidOutputError as e:
                 return jsonify({"error": "Invalid output", "details": str(e)}), 500
         return wrapper
     return decorator
