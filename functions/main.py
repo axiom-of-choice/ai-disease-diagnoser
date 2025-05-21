@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from transcriber import transcribe
 from extractor import extract
 from diagnoser import diagnose
-from common.decorators import validate_model, track_metrics
+from common.decorators import validate_input, track_metrics
 from common.schemas import AudioTranscriptionInput, MedicalInput
 from pydantic import ValidationError
 from config import setup_logger

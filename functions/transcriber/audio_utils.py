@@ -4,11 +4,13 @@ from common.openai_client import client
 from config import setup_logger
 import functions_framework
 from typing import Dict
+from common.decorators import validate_output
 
 logger = setup_logger(__name__)
 
 
 @functions_framework.http
+@validate_output(AudioTranscriptionOutput)
 def transcribe_audio(filepath: str) -> Dict[str, str]:
     """
     Transcribe audio file to text using OpenAI's Whisper model.
@@ -26,7 +28,7 @@ def transcribe_audio(filepath: str) -> Dict[str, str]:
             return {"error": str(e)}
         
     logger.info(f"Transcription response: {response}")
-    response = AudioTranscriptionOutput.model_validate(response.model_dump())
+    # response = AudioTranscriptionOutput.model_validate(response.model_dump())
     return response.model_dump()
 
 def validate_extension(extension: str) -> bool:

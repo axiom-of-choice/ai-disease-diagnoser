@@ -6,6 +6,7 @@ class Patient(BaseModel):
     name: str
     age: int
     id: str
+    gender: str
 
 class MedicalInput(BaseModel):
     patient: Patient

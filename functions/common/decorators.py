@@ -3,7 +3,7 @@ from flask import request, jsonify
 from pydantic import ValidationError, BaseModel
 import time
 
-def validate_model(model: BaseModel):
+def validate_input(model: BaseModel):
     """
     Decorator to validate JSON input against a Pydantic model.
     """
@@ -14,6 +14,21 @@ def validate_model(model: BaseModel):
                 validated_input = model.model_validate(request.json)
                 return func(validated_input)
             except ValidationError as e:
+                raise e
+        return wrapper
+    return decorator
+
+def validate_output(model: BaseModel):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            try:
+                # Validate the response using a Pydantic model
+                validated: BaseModel = model(**result)
+                return validated.model_dump()
+            except Exception as e:
+                # Handle invalid response
                 raise e
         return wrapper
     return decorator

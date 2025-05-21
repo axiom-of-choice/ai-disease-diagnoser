@@ -5,6 +5,7 @@ import sys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TMP_FOLDER = "/tmp/"
 EXTRACT_PROMPT_PATH = "extractor/prompt.txt"
+TEXTO_CLINICO = "TEXTO_CLINICO"
 
 def setup_logger(name):
     logger = logging.getLogger(name)

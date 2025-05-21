@@ -1,12 +1,12 @@
 A partir del siguiente texto clínico, extrae la información en el formato JSON especificado.
 
 Texto:
-"""
-{TEXTO_CLINICO}
-"""
+
+TEXTO_CLINICO
+
 
 Devuelve un objeto JSON con la siguiente estructura:
-```json
+
 {
   "identificacion_paciente": {
     "nombre": "Nombre completo del paciente, si está disponible",
