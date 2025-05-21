@@ -21,7 +21,7 @@ def validate_input(model: BaseModel):
             except (InvalidInputError, ValidationError) as e:
                 logger.error(f"Invalid input: {e.errors() if hasattr(e, 'errors') else str(e)}")
                 return {
-                    "error": "Invalid input",
+                    "error": InvalidInputError.__name__,
                     "function": func.__name__,
                     "details": e.errors() if hasattr(e, 'errors') else str(e)
                 }
@@ -44,7 +44,7 @@ def validate_output(model: BaseModel):
             except (InvalidOutputError, ValidationError) as e:
                 logger.error(f"Invalid output: {e.errors() if hasattr(e, 'errors') else str(e)}")
                 return {
-                    "error": "Invalid output",
+                    "error": InvalidOutputError.__name__,
                     "function": func.__name__,
                     "details": e.errors() if hasattr(e, 'errors') else str(e)
                 }

@@ -6,6 +6,7 @@ from common.utils import load_prompt
 from common.schemas import MedicalInput, DiagnosisOutput
 from config import DIAGNOSIS_PROMPT_PATH, setup_logger, MEDICAL_INPUT, GPT_MODEL
 import json
+from common.exceptions import OpenAIError, JsonDecodeError
 
 
 logger = setup_logger(__name__)
@@ -27,12 +28,19 @@ def diagnose(request: MedicalInput) -> str:
     prompt = load_prompt(DIAGNOSIS_PROMPT_PATH, medical_info, MEDICAL_INPUT)
 
     logger.info("Llamando a OpenAI para el diagnóstico...")
-    response = client.chat.completions.create(
-        model=GPT_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
-    )
-    
+    try:
+        response = client.chat.completions.create(
+            model=GPT_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+    except Exception as e:
+        logger.error(f"Error al llamar a OpenAI: {e}")
+        return {
+            "error": OpenAIError.__name__,
+            "function": diagnose.__name__,
+            "details": str(e)
+        }
     logger.debug("response")
     logger.debug(response.choices[0].message.content)
     logger.info("Diagnóstico generado")
@@ -40,8 +48,11 @@ def diagnose(request: MedicalInput) -> str:
         response = json.loads(response.choices[0].message.content)
     except json.JSONDecodeError as e:
         logger.error(f"Error al decodificar la respuesta JSON: {e}")
-        raise ValueError(f"Error al decodificar la respuesta JSON: {e}")
-
+        return {
+            "error": JsonDecodeError.__name__,
+            "function": diagnose.__name__,
+            "details": str(e)
+        }
     return response
     
 
@@ -59,5 +70,4 @@ def info_parser(info: MedicalInput) -> str:
     Paciente de {patient_details.age} años, de genero {patient_details.gender}, presenta los siguientes síntomas: {', '.join(symptoms)}.
     Motivo de la visita: {reason_for_visit}.
     """
-
     return info_str

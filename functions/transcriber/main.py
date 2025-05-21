@@ -8,6 +8,7 @@ import requests
 from typing import Dict
 from common.openai_client import client
 import os
+from common.exceptions import DownloadFileError, InvalidFileExtensionError, InvalidAudioFormatError, TranscriptionError
 
 
 
@@ -20,16 +21,28 @@ def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
     response = requests.get(audio_url)
     if response.status_code != 200:
         logger.error(f"Failed to download audio file: {response.status_code}")
-        return "Failed to download audio file", 400
+        return {
+                "error": DownloadFileError.__name__,
+                "function": transcribe.__name__,
+                "details": response.text
+                }
     
     logger.info(f"Downloaded audio file from URL: {audio_url}")
     extension = get_file_extension(response.headers.get("Content-Type"))
     logger.info(f"File extension determined: {extension}")
     if not extension:
         logger.error("Could not determine file extension from Content-Type header")
-        return "Could not determine file extension", 400
+        return {
+                "error": InvalidFileExtensionError.__name__,
+                "function": transcribe.__name__,
+                "details": extension
+                }
     if not validate_extension(extension):
-        return "Invalid file extension", 400
+        return {
+                "error": InvalidAudioFormatError.__name__,
+                "function": transcribe.__name__,
+                "details": extension
+        }
     logger.info(f"Transcribing audio from URL: {audio_url}")
     filename = generate_uuid()
     file_path = f"{TMP_FOLDER}{filename}.{extension}"
@@ -55,7 +68,11 @@ def transcribe_audio(filepath: str) -> Dict[str, str]:
             )
         except Exception as e:
             logger.error(f"Error during transcription: {e}")
-            return {"error": str(e)}
+            return {
+                "error": TranscriptionError.__name__,
+                "function": transcribe_audio.__name__,
+                "details": str(e)
+            }
         
     # response = AudioTranscriptionOutput.model_validate(response.model_dump())
     return response.model_dump()

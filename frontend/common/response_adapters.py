@@ -1,7 +1,8 @@
 from typing import List, Dict, Any
 from requests.models import Response
 from common.config import setup_logger
-from common.schemas import DiagnosisResponse
+from common.schemas import DiagnosisResponse, ErrorResponse
+from common.exceptions import InvalidInputError, InvalidOutputError
 
 # Configuración del logger
 logger = setup_logger(__name__)
@@ -23,15 +24,14 @@ def handle_diagnostic_response(diagnostic_response: Response) -> str:
             # Bad request
             logger.error("Bad request: Invalid input data.")
             return_value = handle_bad_request_response(response_modeled)
-            
         case 500:
             # Internal server error
             logger.error("Internal server error: Something went wrong.")
-            return_value = handle_internal_server_error_response()
+            return_value = handle_internal_server_error_response(response_modeled)
         case _:
             # Other errors
             logger.error(f"Unexpected error: {status_code}")
-            return_value = handle_unexpected_error_response()
+            return_value = handle_unexpected_error_response(response_modeled)
     
     return return_value
     
@@ -52,34 +52,52 @@ def handle_bad_request_response(response: DiagnosisResponse) -> str:
     """
     Handle the bad request response from the transcription function.
     """
-    return extract_missing_pydantic_fields(response)
+    error_message = response.error.message + "\n in Function: " + response.error.function
+    logger.error(f"Error message: {error_message}")
+    logger.error(f"Function name: {response.error.function}")
+    logger.error(f"Error details: {response.error.details}")
     
-def extract_missing_pydantic_fields(response: DiagnosisResponse) -> Dict[str, Any]:
+    
+    match error_message:
+        case InvalidInputError.__name__ | InvalidOutputError.__name__:
+            error_message = error_message + "\n" + extract_missing_pydantic_fields(response.error)
+        case _:
+            logger.error("Unexpected error: No missing fields found.")
+            error_message = error_message + "\n Details: \n" + str(response.error.details)
+    return f"Error: {error_message}"
+    
+def extract_missing_pydantic_fields(response: ErrorResponse) -> str:
     """
-    Extract missing fields from the Pydantic model.
+    Extract and format missing/invalid fields from the Pydantic error details.
+    Returns a user-friendly string.
     """
+    error_details = response.details
+    if not error_details or not isinstance(error_details, list):
+        return "Error de validación desconocido."
     missing_fields = []
-    logger.info(f"Missing fields in response: {response}")
-    logger.info(f"Model fields in response: {response.model_fields_set}")
-    logger.info(f"Model fields in response: {response.model_dump()}")
-    for field in response.model_fields_set:
-        if field not in response.model_dump():
-            missing_fields.append(field)
-            
-    text_combined = f"""
-    La respuesta no pudo ser procesada porque faltan los siguientes campos:
-    {missing_fields}
-    """
-    return text_combined
+    for field in error_details:
+        if isinstance(field, dict):
+            field_path = ".".join(str(part) for part in field.get("loc", []))
+            field_message = field.get("msg", "")
+            missing_fields.append(f"- {field_path}: {field_message}")
+        else:
+            missing_fields.append(str(field))
+    return "Missing or invalid fields:\n" + "\n".join(missing_fields)    
 
-def handle_internal_server_error_response() -> str:
+def handle_internal_server_error_response(response: DiagnosisResponse) -> str:
     """
     Handle the internal server error response from the transcription function.
     """
-    return "Error: Something went wrong. See logs for details."
+    error = response.error
+    error_message = error.message + "\n in Function: " + error.function + "\n Details: \n" + str(error.details)
+    logger.error(f"Error message: {error_message}")
+    return error_message
 
-def handle_unexpected_error_response() -> str:
+def handle_unexpected_error_response(response: DiagnosisResponse) -> str:
     """
     Handle the unexpected error response from the transcription function.
     """
-    return "Error: Unexpected error. See logs for details."
+    error = response.error
+    error_message = error.message + "\n in Function: " + error.function + "\n Details: \n" + str(error.details)
+    logger.error(f"Error message: {error_message}")
+    return error_message

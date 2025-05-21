@@ -5,6 +5,7 @@ from common.schemas import AudioTranscriptionOutput, MedicalInput
 import functions_framework
 from common.decorators import validate_input, validate_output
 import json
+from common.exceptions import OpenAIError, JsonDecodeError
 
 logger = setup_logger(__name__)
 
@@ -29,7 +30,12 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
             max_tokens=800
         )
     except Exception as e:
-        raise Exception(f"Error al llamar a OpenAI: {e}")
+        logger.error(f"Error al llamar a OpenAI: {e}")
+        return {
+            "error": OpenAIError.__name__,
+            "function": extract.__name__,
+            "details": str(e)
+        }
     
     logger.debug("response")
     logger.debug(response.choices[0].message.content)
@@ -37,6 +43,10 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
         response = json.loads(response.choices[0].message.content)
     except json.JSONDecodeError as e:
         logger.error(f"Error al decodificar la respuesta JSON: {e}")
-        raise ValueError(f"Error al decodificar la respuesta JSON: {e}")
+        return {
+            "error": JsonDecodeError.__name__,
+            "function": extract.__name__,
+            "details": str(e)
+        }
 
     return response
