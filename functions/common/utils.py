@@ -1,5 +1,6 @@
 import uuid
 from common.schemas import ValidExtensions
+import traceback
 
 from config import setup_logger
 
@@ -58,3 +59,16 @@ def get_file_extension(filepath: str) -> str:
         logger.error(f"Error getting file extension: {e}")
         return None
     return ext
+
+def get_truncated_traceback(exc, max_lines=100, max_chars=1000):
+    tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    # Flatten to a single string, then split into lines
+    tb_str = ''.join(tb_lines)
+    tb_split = tb_str.strip().splitlines()
+    # Keep only the last max_lines lines
+    truncated_lines = tb_split[-max_lines:]
+    truncated_tb = '\n'.join(truncated_lines)
+    # If still too long, truncate characters but keep the end
+    if len(truncated_tb) > max_chars:
+        truncated_tb = '...\n' + truncated_tb[-max_chars:]
+    return truncated_tb

@@ -7,13 +7,13 @@ from common.decorators import validate_input, validate_output
 import requests
 from typing import Dict
 from common.openai_client import client
+import os
 
 
 
 logger = setup_logger(__name__)
 
 @functions_framework.http
-@validate_output(AudioTranscriptionOutput)
 @validate_input(AudioTranscriptionInput)
 def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
     audio_url = request.model_dump().get("audio_url")
@@ -36,8 +36,11 @@ def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
     write_file(file_path, response.content)
     logger.info("Transcribing audio...")
     result = transcribe_audio(file_path)
+    os.unlink(file_path)  # Clean up the temporary file
+    logger.info(f"Transcription result: {result}")
     return result
 
+@validate_output(AudioTranscriptionOutput)
 def transcribe_audio(filepath: str) -> Dict[str, str]:
     """
     Transcribe audio file to text using OpenAI's Whisper model.
@@ -54,6 +57,5 @@ def transcribe_audio(filepath: str) -> Dict[str, str]:
             logger.error(f"Error during transcription: {e}")
             return {"error": str(e)}
         
-    logger.info(f"Transcription response: {response}")
     # response = AudioTranscriptionOutput.model_validate(response.model_dump())
     return response.model_dump()

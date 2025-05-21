@@ -9,8 +9,8 @@ import json
 logger = setup_logger(__name__)
 
 @functions_framework.http
-@validate_output(MedicalInput)
 @validate_input(AudioTranscriptionOutput)
+@validate_output(MedicalInput)
 def extract(request: AudioTranscriptionOutput) -> MedicalInput:
     """
     Usa el modelo de OpenAI para extraer datos clínicos estructurados desde texto libre.
@@ -24,6 +24,7 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
         response = client.chat.completions.create(
             model="gpt-4",  # Cambiar a "gpt-3.5-turbo" si se desea
             messages=[{"role": "user", "content": prompt}],
+            # response_format="json",
             temperature=0.2,
             max_tokens=800
         )
@@ -39,4 +40,3 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
         raise ValueError(f"Error al decodificar la respuesta JSON: {e}")
 
     return response
-

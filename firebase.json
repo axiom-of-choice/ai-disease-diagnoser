@@ -9,19 +9,29 @@
     "runtime": "python311"
   },
   "hosting": {
-    "public": "frontend/build",
+    "public": "public",
     "rewrites": [
       {
-        "source": "/api/**",
-        "run": {
-          "serviceId": "api",
-          "region": "us-central1"
-        }
+      "source": "/api/transcribe",
+      "function": "transcribe_audio"
       },
       {
-        "source": "**",
-        "destination": "/index.html"
-      }
+        "source": "/api/extract",
+        "function": "extract_medical_info"
+      },
+      {
+        "source": "/api/diagnose",
+        "function": "generate_diagnose"
+      },
+      {
+        "source": "/api/process",
+        "function": "process_medical_data"
+      },
+      {
+        "source": "/api/health",
+        "function": "health"
+      },
+      { "source": "**", "function": "not_found" }
     ]
   }
 }

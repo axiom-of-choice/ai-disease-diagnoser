@@ -24,6 +24,13 @@ class DiagnosisOutput(BaseModel):
     treatment: str
     recommendations: str
     
+class Response(BaseModel):
+    status: str
+    transcribed_text: Optional[str] = None
+    extracted_info: Optional[str] = None
+    diagnosis_report: Optional[str] = None
+    error: Optional[str] = None
+    
 class ValidExtensions(enum.Enum):
     mp3 = "mp3"
     mp4 = "mp4"

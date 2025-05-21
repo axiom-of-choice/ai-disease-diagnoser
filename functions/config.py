@@ -3,9 +3,17 @@ import logging
 import sys
 from dotenv import load_dotenv
 
-load_dotenv()
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    # Fallback para desarrollo local si usas .env
+    from dotenv import load_dotenv
+    load_dotenv()
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+    
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY not found. Please set it as an environment variable or via Firebase functions:config:set")
+
 TMP_FOLDER = "/tmp/"
 EXTRACT_PROMPT_PATH = "extractor/prompt.txt"
 TEXTO_CLINICO = "TEXTO_CLINICO"
@@ -15,9 +23,9 @@ DIAGNOSIS_PROMPT_PATH = "diagnoser/prompt.txt"
 def setup_logger(name):
     logger = logging.getLogger(name)
     if not logger.hasHandlers():
-        handler = logging.StreamHandler(sys.stdout)
+        handler = logging.StreamHandler()
         formatter = logging.Formatter(
-            '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+            '[%(asctime)s] %(levelname)s in %(name)s:%(filename)s: %(message)s'
         )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
