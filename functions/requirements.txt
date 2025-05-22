@@ -4,3 +4,4 @@ streamlit
 openai
 fastapi
 python-dotenv
+functions-framework

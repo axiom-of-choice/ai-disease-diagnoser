@@ -44,6 +44,7 @@ General view of the project structure
 │   ├── Dockerfile          # File to build the docker image (if needed)   
 │   ├── app.py              # Simple app definition
 │   ├── config.py           # Basic configs
+│   ├── sample.env          # Basic configs
 │   └── requirements.txt    # No description needed
 │
 ├── functions               # Backend package. The name functions is needed due to firebase functions constraints.
@@ -77,7 +78,7 @@ General view of the project structure
 │   ├── main.py             # Main file containing endpoint definitions and orchestrator function (explained later)  
 │   ├── __init__.py         # No description needed
 │   ├── .gitignore          # No description needed
-│   ├── .env                # Important file to add your environment variables.
+│   ├── sample.env          # Important file to add your environment variables.
 │   ├── config.py           # Basic configurations file 
 │   ├── requirements_test.txt  # No description needed
 │   └── requirements.txt    # No description needed
@@ -89,18 +90,19 @@ General view of the project structure
 
 ---
 
-# ⚙️ Configurations and deploy
+# ⚙️ Configurations of the project to run locally
 
-## 1. Auth Google Cloud
+## 1. Auth Google Cloud asnd Firebase
 
-```
-Install firebase CLI y log in 
-gcloud config set project TU_ID_DEL_PROYECTO
-```
+
+Install firebase CLI y log in. 
+
+[reference](https://firebase.google.com/docs/hosting/quickstart)
+
 
 ## 2. Config Open AI APi Key
 
-Add you API key into .env file
+Add you API key into functions/sample.env file and **rename the file to .env**
 
 ## 3. Run functions locally
 
@@ -108,85 +110,34 @@ Add you API key into .env file
 firebase emulators:start --only functions,hosting
 ```
 
-### Función 1: Transcripción
-```
-cd transcribe_audio
-gcloud functions deploy transcribe_audio \\
-  --runtime python311 \\
-  --trigger-http \\
-  --allow-unauthenticated \\
-  --region us-central1
-```
+After doing this, the backend should be up and running.
+You need to check your terminal to see the links for accesing the functions locally. Something like this:
+![image](public/Screenshot%202025-05-22%20at%2010.21.11 a.m..jpg)
 
-### Función 2: Extracción médica
-```
-cd extract_medical_info
-gcloud functions deploy extract_medical_info \\
-  --runtime python311 \\
-  --trigger-http \\
-  --allow-unauthenticated \\
-  --region us-central1
-```
-
-### Función 3: Generación de diagnóstico
-```
-cd generate_diagnosis
-gcloud functions deploy generate_diagnosis \\
-  --runtime python311 \\
-  --trigger-http \\
-  --allow-unauthenticated \\
-  --region us-central1
-```
+**Save up the URL showed (in the image case http://127.0.0.1:5001/ai-diagnoser/us-central1/process_medical_data) because you will need it for the streamlit app**
 
 ## 4. Run streamlit app
+First, **rename the sample.env to .env** and add the url above showed into the file as the ENDPOINT_URL var.
+
+
+In another terminal, run the following.
+
 ```
 pip install -r frontend/requirements.txt
-streamlit run forntend/app.py
+streamlit run frontend/app.py
 ```
 
-# 🧪 Ejemplo de uso
+You should be able to see something like this if everything went good.
 
-## Entrada (en frontend):
-* Opción 1: https://audiourl.something
-* Opción 2: Texto: "My name is NAME i am GENDER i have YY years and i feel..."
+![image](public/Screenshot%202025-05-22%20at%2010.25.33 a.m..jpg)
 
+# 🧪 Sample use case.
 
-
-## Salida
-```
-{
-  "data": {
-    "resultado": "Diagnóstico: Angina de pecho... Tratamiento: Reposo, nitroglicerina... Recomendaciones: Evitar esfuerzos..."
-}
-```
-# High level functionality
-
-
-                                      ┌─────────────┐
-                                      │     User    │
-                                      └────┬────────┘
-                                           │
-                          ┌────────────────┴───────────────┐
-                          │           Web App              │
-                          │  (React, Streamlit, etc.)      │
-                          └────────────────┬───────────────┘
-                                           │
-                      ┌────────────────────┼────────────────────────┐
-                      ▼                    ▼                        ▼
-       [Audio URL or Text]        [See results ]       [Show errors/logs]
-                                           │
-                                ┌──────────▼────────────┐
-                                │   Firebase Functions  │
-                                │       (Python)        │
-                                └──────────┬────────────┘
-                                           ▼
-    ┌─────────────┐ ┌──────────────────────┐ ┌────────────────────────┐
-    │ Transcribe  │→│ Exttract data        │→│ Generate diagnostic    │
-    └─────────────┘ └──────────────────────┘ └────────────────────────┘
-      (Open AI)        (OpenAI / Gemini)         (OpenAI / Gemini)
-                               │                          │
-                     ┌────────▼────────┐       ┌──────────▼────────────┐
-                     │   JSON Schema   │       │ Structured Text       │
-                     └─────────────────┘       └───────────────────────┘
+## Option 1: https://audiourl.something:
+## Output
+![image](public/Use_case_audio.jpg)
+## Option 2
+## Output
+![image](public/Use_case_text.jpg)
 
 
