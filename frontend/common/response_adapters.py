@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from requests.models import Response
-from common.config import setup_logger
+from config import setup_logger
 from common.schemas import DiagnosisResponse, ErrorResponse
 from common.exceptions import InvalidInputError, InvalidOutputError
 from collections.abc import Iterable
