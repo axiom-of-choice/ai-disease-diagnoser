@@ -57,18 +57,19 @@ def handle_bad_request_response(response: DiagnosisResponse) -> str:
     """
     Handle the bad request response from the transcription function.
     """
-    error_message = response.error.message + "\n in Function: " + response.error.function
+    function_name = response.error.function if response.error.function else "Unknown function"
+    details = response.error.details if response.error.details else "No details available"
+    error_message = response.error.message + "\n in Function: " + str(function_name)
     logger.error(f"Error message: {error_message}")
     logger.error(f"Function name: {response.error.function}")
     logger.error(f"Error details: {response.error.details}")
-    
     
     match error_message:
         case InvalidInputError.__name__ | InvalidOutputError.__name__:
             error_message = error_message + "\n" + extract_missing_pydantic_fields(response.error)
         case _:
             logger.error("Unexpected error: No missing fields found.")
-            error_message = error_message + "\n Details: \n" + str(response.error.details)
+            error_message = error_message + "\n Details: \n" + str(details)
     return f"Error: {error_message}"
     
 def extract_missing_pydantic_fields(response: ErrorResponse) -> str:
@@ -94,7 +95,9 @@ def handle_internal_server_error_response(response: DiagnosisResponse) -> str:
     Handle the internal server error response from the transcription function.
     """
     error = response.error
-    error_message = error.message + "\n in Function: " + error.function + "\n Details: \n" + str(error.details)
+    function_name = error.function if error.function else "Unknown function"
+    details = error.details if error.details else "No details available"
+    error_message = error.message + "\n in Function: " + str(function_name) + "\n Details: \n" + str(details)
     logger.error(f"Error message: {error_message}")
     return error_message
 
@@ -103,6 +106,8 @@ def handle_unexpected_error_response(response: DiagnosisResponse) -> str:
     Handle the unexpected error response from the transcription function.
     """
     error = response.error
-    error_message = error.message + "\n in Function: " + error.function + "\n Details: \n" + str(error.details)
+    function_name = error.function if error.function else "Unknown function"
+    details = error.details if error.details else "No details available"
+    error_message = error.message + "\n in Function: " + str(function_name) + "\n Details: \n" + str(details)
     logger.error(f"Error message: {error_message}")
     return error_message
