@@ -162,7 +162,6 @@ You should be able to see something like this if everything went good.
 
 ## Option 1: https://audiourl.something:
 ### Output
-![Alt Text](public/Usage.gif)
 ![image](public/Use_case_audio.jpg)
 ## Option 2: Free text
 ### Output
