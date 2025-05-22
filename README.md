@@ -194,3 +194,7 @@ I did not do that because setting up network within docker containers and local 
 ### 6. Lack of appropiate unit tests
 
 I did not have enough time to do it :(
+
+### 7. No CI/CD flow was configured
+
+I added some generic files to do so, but did not take the time to configure it. Ideally we should have it running tests and deploying versions of the functions
