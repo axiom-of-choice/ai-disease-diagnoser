@@ -5,8 +5,7 @@ from common.schemas import AudioTranscriptionInput, Response, AudioTranscription
 from common.utils import get_truncated_traceback, check_and_return_error
 import json
 from flask import Request
-from flask_cors import CORS, cross_origin
-from flask import jsonify
+from flask_cors import cross_origin
 from firebase_functions import https_fn
 from firebase_admin import initialize_app
 
