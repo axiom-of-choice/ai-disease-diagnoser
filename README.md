@@ -117,6 +117,20 @@ Add you API key into functions/sample.env file and **rename the file to .env**
 
 ## 3. Run functions locally
 
+First create a venv in functions directory.
+
+```
+python3 -m venv functions/venv
+```
+
+Activate env and install requirements
+
+```
+source functions/venv/bin/activate && pip install -r functions/requirements.txt
+```
+
+Run firebase emulators.
+
 ```
 firebase emulators:start --only functions,hosting
 ```
