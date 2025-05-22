@@ -124,12 +124,20 @@ def generate_diagnose(request: Request) -> https_fn.Response:
 def process_medical_data(request: Request) -> https_fn.Response:
     if request.method != 'POST':
         # Wrap error in a Response object
-        return https_fn.Response("Method not allowed", status=405)
+        response = Response(
+            status="error",
+            error={"message": "Method not allowed"}
+            ).model_dump_json()
+        return https_fn.Response(response, status=405)
 
     data = request.get_json(silent=True)
     if not data:
         # Wrap error in a Response object
-        return https_fn.Response(json.dumps({"error": "No valid JSON was received."}), status=400, mimetype="application/json")
+        response = Response(
+            status="error",
+            error={"message": "No valid JSON was received."}
+            ).model_dump_json()
+        return https_fn.Response(response, status=400, mimetype="application/json")
 
     audio_url = data.get("audio_url")
     text_input = data.get("text_input")
@@ -148,7 +156,11 @@ def process_medical_data(request: Request) -> https_fn.Response:
             text_to_process = AudioTranscriptionOutput(text=text_input)
         else:
             # Wrap error in a Response object
-            return https_fn.Response(json.dumps({"error": "You must send an 'audio_url' or 'text_input'. field"}), status=400, mimetype="application/json")
+            response = Response(
+                status="error",
+                error={"message": "You must send an 'audio_url' or 'text_input' field"}
+            ).model_dump_json()
+            return https_fn.Response(response, status=400, mimetype="application/json")
 
         logger.info("Extracting medical data...")
         logger.info(f"Text to be processed: {text_to_process}")
