@@ -42,11 +42,11 @@ else:
                 result = handle_diagnostic_response(response)
             if response.status_code != 200:
                 st.error(f"Error processing text: {response.status_code}")
-                st.text(result)
+                st.error(result)
                 st.stop()
             st.success("Text processed successfully")
             st.text(result)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error processing text: {e}")
-            st.text(result)
+            st.error(result)
             st.stop()

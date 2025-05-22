@@ -3,6 +3,7 @@ from requests.models import Response
 from common.config import setup_logger
 from common.schemas import DiagnosisResponse, ErrorResponse
 from common.exceptions import InvalidInputError, InvalidOutputError
+from collections.abc import Iterable
 
 # Configuración del logger
 logger = setup_logger(__name__)
@@ -59,13 +60,15 @@ def handle_bad_request_response(response: DiagnosisResponse) -> str:
     """
     function_name = response.error.function if response.error.function else "Unknown function"
     details = response.error.details if response.error.details else "No details available"
-    error_message = response.error.message + "\n in Function: " + str(function_name)
+    error_message = response.error.message
     logger.error(f"Error message: {error_message}")
     logger.error(f"Function name: {response.error.function}")
     logger.error(f"Error details: {response.error.details}")
     
     match error_message:
         case InvalidInputError.__name__ | InvalidOutputError.__name__:
+            error_message = error_message + "\n in Function: " + str(function_name) + "\n Details: \n" + str(details)
+            logger.info("Invalid input or output error: Missing or invalid fields.")
             error_message = error_message + "\n" + extract_missing_pydantic_fields(response.error)
         case _:
             logger.error("Unexpected error: No missing fields found.")
@@ -78,7 +81,8 @@ def extract_missing_pydantic_fields(response: ErrorResponse) -> str:
     Returns a user-friendly string.
     """
     error_details = response.details
-    if not error_details or not isinstance(error_details, list):
+    logger.error(f"Error details: {error_details}")
+    if not error_details or not isinstance(error_details, Iterable):
         return "No missing or invalid fields found."
     missing_fields = []
     for field in error_details:
