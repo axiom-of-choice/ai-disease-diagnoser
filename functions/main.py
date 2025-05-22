@@ -31,11 +31,8 @@ def not_found(request: Request) -> https_fn.Response:
 @https_fn.on_request()
 @cross_origin()
 def health(request: Request) -> https_fn.Response:
-    """
-    Endpoint de salud para verificar el estado de la función.
-    """
     if request.method != 'GET':
-        return https_fn.Response("Método no permitido", status=405)
+        return https_fn.Response("Method not allowed", status=405)
 
     return https_fn.Response(json.dumps({"status": "healthy"}), status=200, mimetype="application/json")
 
@@ -43,18 +40,15 @@ def health(request: Request) -> https_fn.Response:
 @https_fn.on_request()
 @cross_origin()
 def transcribe_audio(request: Request) -> https_fn.Response:
-    """
-    Endpoint para transcribir audio a texto.
-    """
     if request.method != 'POST':
         # Wrap error in a Response object
-        return https_fn.Response("Método no permitido", status=405)
+        return https_fn.Response("Method not allowed", status=405)
     
     try:
         data = request.get_json(silent=True)
         if not data:
             # Wrap error in a Response object
-            return https_fn.Response(json.dumps({"error": "No se recibió JSON válido."}), status=400, mimetype="application/json")
+            return https_fn.Response(json.dumps({"error": "No valid JSON was received."}), status=400, mimetype="application/json")
         transcribed_text = transcribe(AudioTranscriptionInput(**data))
         response = AudioTranscriptionOutput(**transcribed_text).model_dump_json()
     except ValueError as e:
@@ -73,18 +67,15 @@ def transcribe_audio(request: Request) -> https_fn.Response:
 @https_fn.on_request()
 @cross_origin()
 def extract_medical_info(request: Request) -> https_fn.Response:
-    """
-    Endpoint para extraer información médica desde texto.
-    """
     if request.method != 'POST':
         # Wrap error in a Response object
-        return https_fn.Response("Método no permitido", status=405)
+        return https_fn.Response("Method not allowed", status=405)
     
     try:
         data = request.get_json(silent=True)
         if not data:
             # Wrap error in a Response object
-            return https_fn.Response(json.dumps({"error": "No se recibió JSON válido."}), status=400, mimetype="application/json")
+            return https_fn.Response(json.dumps({"error": "No valid JSON was received."}), status=400, mimetype="application/json")
         extracted_info = extract(AudioTranscriptionOutput(**data))
         response = json.dumps(extracted_info)
     except ValueError as e:
@@ -101,20 +92,17 @@ def extract_medical_info(request: Request) -> https_fn.Response:
 
 # Singleton endpoint for diagnose
 @https_fn.on_request()
-@cross_origin()  # Permite solicitudes CORS desde cualquier origen (ajustar en producción)
+@cross_origin()
 def generate_diagnose(request: Request) -> https_fn.Response:
-    """
-    Endpoint para generar un diagnóstico médico.
-    """
     if request.method != 'POST':
         # Wrap error in a Response object
-        return https_fn.Response("Método no permitido", status=405)
+        return https_fn.Response("Method not allowed", status=405)
     
     try:
         data = request.get_json(silent=True)
         if not data:
             # Wrap error in a Response object
-            return https_fn.Response(json.dumps({"error": "No se recibió JSON válido."}), status=400, mimetype="application/json")
+            return https_fn.Response(json.dumps({"error": "No valid JSON was received."}), status=400, mimetype="application/json")
         diagnosis_report = diagnose(MedicalInput(**data))
         logger.info(diagnosis_report)
         response = DiagnosisOutput(**diagnosis_report).model_dump_json()
@@ -134,17 +122,14 @@ def generate_diagnose(request: Request) -> https_fn.Response:
 @https_fn.on_request()
 @cross_origin()
 def process_medical_data(request: Request) -> https_fn.Response:
-    """
-    Cloud Function que orquesta la transcripción, extracción y generación médica.
-    """
     if request.method != 'POST':
         # Wrap error in a Response object
-        return https_fn.Response("Método no permitido", status=405)
+        return https_fn.Response("Method not allowed", status=405)
 
     data = request.get_json(silent=True)
     if not data:
         # Wrap error in a Response object
-        return https_fn.Response(json.dumps({"error": "No se recibió JSON válido."}), status=400, mimetype="application/json")
+        return https_fn.Response(json.dumps({"error": "No valid JSON was received."}), status=400, mimetype="application/json")
 
     audio_url = data.get("audio_url")
     text_input = data.get("text_input")
@@ -153,6 +138,7 @@ def process_medical_data(request: Request) -> https_fn.Response:
     status = "failed"
     try:
         if audio_url:
+            logger.info("Transcribing audio...")
             transcribed_text = transcribe(AudioTranscriptionInput(audio_url=audio_url))
             error_response = check_and_return_error(transcribed_text)
             if error_response:
@@ -162,13 +148,12 @@ def process_medical_data(request: Request) -> https_fn.Response:
             text_to_process = AudioTranscriptionOutput(text=text_input)
         else:
             # Wrap error in a Response object
-            return https_fn.Response(json.dumps({"error": "Debe proporcionar un 'audio_url' o 'text_input'."}), status=400, mimetype="application/json")
+            return https_fn.Response(json.dumps({"error": "You must send an 'audio_url' or 'text_input'. field"}), status=400, mimetype="application/json")
 
-        # Paso 2: Extracción de información médica
-        logger.info("Extrayendo información médica...")
-        logger.info(f"Texto a procesar: {text_to_process}")
+        logger.info("Extracting medical data...")
+        logger.info(f"Text to be processed: {text_to_process}")
         extracted_info = extract(text_to_process)
-        logger.info(f"Información extraída: {extracted_info}")
+        logger.info(f"Info extracted: {extracted_info}")
         error_response = check_and_return_error(extracted_info)
         if error_response:
             return error_response

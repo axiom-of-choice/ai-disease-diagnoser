@@ -1,27 +1,27 @@
-A partir del siguiente texto clínico, extrae la información en el formato JSON especificado.
+From the following clinical text, extract the information in the specified JSON format.
 
-Texto:
+Text:
 
-TEXTO_CLINICO
+CLINICAL_TEXT
 
 
-Devuelve un objeto JSON con la siguiente estructura:
+Return a JSON object with the following structure:
 
 {
   "patient": {
-    "name": "Nombre completo del paciente, si está disponible",
-    "age": "Edad del paciente en años, si está disponible",
-    "id": "Número de identificación, si aparece",
-    "gender": "Masculino, Femenino u Otro, si está indicado"
+    "name": "Full name of the patient, if available",
+    "age": "Patient's age in years, if available",
+    "id": "Identification number, if provided",
+    "gender": "Male, Female, or Other, if indicated"
   },
-  "reason_for_visit": "Breve descripción del motivo principal por el cual el paciente acude a consulta, si está disponible y claro.",
+  "reason_for_visit": "Brief description of the main reason for the patient's visit, if available and clear.",
   "symptoms": [
-    "Lista de síntomas reportados o identificados en el texto, en lenguaje médico estandarizado, si esta disponible y claro.",
+    "List of symptoms reported or identified in the text, in standardized medical language, if available and clear."
   ]
 }
 
-Reglas:
-No inventes información que no esté presente claramente en el texto.
-Si un campo no está disponible, déjalo como null.
-Usa lenguaje claro y preciso, evita redundancias.
-Lista solo síntomas, no diagnósticos.
+Rules:
+Do not invent information that is not clearly stated in the text.
+If a field is not available, leave it as null.
+Use clear and precise language, avoid redundancies.
+List only symptoms, not diagnoses.

@@ -8,10 +8,6 @@ from config import setup_logger
 logger = setup_logger(__name__)
 
 def validate_input(model: BaseModel):
-    """
-    Decorator to validate input against a Pydantic model.
-    Returns a dict with error details on validation failure.
-    """
     def decorator(func):
         @wraps(func)
         def wrapper(arg, *args, **kwargs):
