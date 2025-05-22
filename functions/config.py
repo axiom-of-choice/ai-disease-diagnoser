@@ -1,7 +1,6 @@
 import os
 import logging
 import sys
-from dotenv import load_dotenv
 
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -13,7 +12,6 @@ if not OPENAI_API_KEY:
     
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY not found. Please set it as an environment variable or via Firebase functions:config:set")
-
 TMP_FOLDER = "/tmp/"
 EXTRACT_PROMPT_PATH = "extractor/prompt.txt"
 TEXTO_CLINICO = "CLINICAL_TEXT"

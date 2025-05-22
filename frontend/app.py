@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
-from common.config import setup_logger
+from config import setup_logger
+from config import ENDPOINT_URL
 from common.response_adapters import handle_diagnostic_response
 
 # Configuración del logger
@@ -17,7 +18,7 @@ if option == "Audio Link":
     if st.button("Process audio"):
         try:
             with st.spinner("Processing...", show_time=True):
-                response = requests.post("http://127.0.0.1:5001/ai-diagnoser/us-central1/process_medical_data", json={"audio_url": audio_url})
+                response = requests.post(ENDPOINT_URL, json={"audio_url": audio_url})
                 logger.info(f"Response: {response.json()}")
                 result = handle_diagnostic_response(response)
             if response.status_code != 200:
@@ -32,10 +33,7 @@ if option == "Audio Link":
                 st.json(response.json())
         except requests.exceptions.RequestException as e:
             st.error(f"Error processing the audio: {e}")
-            st.text(result)
             logger.error(f"Error processing the audio: {e}")
-            with st.expander("View full JSON response for advanced users"):
-                    st.json(response.json())
             st.stop()
 else:
     texto_libre = st.text_area("Write the free text")
@@ -43,7 +41,7 @@ else:
         logger.info(f"Free Text: {texto_libre}")
         try:
             with st.spinner("Processing...", show_time=True):
-                response = requests.post("http://127.0.0.1:5001/ai-diagnoser/us-central1/process_medical_data", json={"text_input": texto_libre})
+                response = requests.post(ENDPOINT_URL, json={"text_input": texto_libre})
                 logger.info(f"Response: {response.json()}")
                 result = handle_diagnostic_response(response)
             if response.status_code != 200:
@@ -58,7 +56,5 @@ else:
                     st.json(response.json())
         except requests.exceptions.RequestException as e:
             logger.error(f"Error processing text: {e}")
-            st.error(result)
-            with st.expander("View full JSON response for advanced users"):
-                    st.json(response.json())
+            st.error(f"Error processing the text: {e}")
             st.stop()

@@ -33,7 +33,6 @@ General view of the project structure
 │
 │   ├── common              # Package of common modules. Can be decoupled as external library.
 │     ├── __init__.py       # No description needed
-│     ├── config.py         # Basic configs
 │     ├── exceptions.py     # Exceptions module
 │     ├── response_adapters.py # Adapters for displaying the API response in a friendly way
 │     └── schemas.py        # Schemas modules for validation
@@ -44,6 +43,7 @@ General view of the project structure
 │   ├── .dockerignore       # # No description needed
 │   ├── Dockerfile          # File to build the docker image (if needed)   
 │   ├── app.py              # Simple app definition
+│   ├── config.py           # Basic configs
 │   └── requirements.txt    # No description needed
 │
 ├── functions               # Backend package. The name functions is needed due to firebase functions constraints.
