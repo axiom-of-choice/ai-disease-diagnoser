@@ -30,7 +30,7 @@ def generate_uuid() -> str:
 
 def load_prompt(path: str, texto_clinico: str, replace_text: str) -> str:
     """
-    Carga el prompt desde un archivo de texto y reemplaza el marcador con el texto clínico.
+    Loads a prompt from a file and replaces a placeholder with the injected text.
     """
     try:
         with open(path, "r", encoding="utf-8") as file:

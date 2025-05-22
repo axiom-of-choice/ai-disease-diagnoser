@@ -3,6 +3,7 @@ from requests.models import Response
 from common.config import setup_logger
 from common.schemas import DiagnosisResponse, ErrorResponse
 from common.exceptions import InvalidInputError, InvalidOutputError
+from collections.abc import Iterable
 
 # Configuración del logger
 logger = setup_logger(__name__)
@@ -39,12 +40,18 @@ def handle_success_response(response: DiagnosisResponse) -> str:
     """
     Handle the success response from the transcription function.
     """
+    diagnosis_report: dict = response.diagnosis_report
+    extacted_info: dict = response.extracted_info
     text_combined = f"""
-    Hola! {response.extracted_info.get("patient").get("name")}, soy el asistente médico. \n
-    Aquí tienes el diagnóstico basado en la información proporcionada: \n
-    Diagnostico: {response.diagnosis_report.get("diagnostic")} \n
-    Tratamiento: {response.diagnosis_report.get("treatment")} \n
-    Recomendaciones: {response.diagnosis_report.get("recommendations")}
+    Hello! {extacted_info.get("patient").get("name")}, I am the AI medic assistant.
+    Based on the information you provided, I have generated a report. \n
+    Name: {extacted_info.get("patient").get("name")} \n
+    Age: {extacted_info.get("patient").get("age")} \n
+    Gender: {extacted_info.get("patient").get("gender")} \n
+    Symptoms: {extacted_info.get("symptoms")} \n
+    Diagnosis: {diagnosis_report.get("diagnostic")} \n
+    Treatment: {diagnosis_report.get("treatment")} \n
+    Recommendations: {diagnosis_report.get("recommendations")} \n
     """
     return text_combined
     
@@ -52,18 +59,21 @@ def handle_bad_request_response(response: DiagnosisResponse) -> str:
     """
     Handle the bad request response from the transcription function.
     """
-    error_message = response.error.message + "\n in Function: " + response.error.function
+    function_name = response.error.function if response.error.function else "Unknown function"
+    details = response.error.details if response.error.details else "No details available"
+    error_message = response.error.message
     logger.error(f"Error message: {error_message}")
     logger.error(f"Function name: {response.error.function}")
     logger.error(f"Error details: {response.error.details}")
     
-    
     match error_message:
         case InvalidInputError.__name__ | InvalidOutputError.__name__:
+            error_message = error_message + "\n in Function: " + str(function_name) + "\n Details: \n" + str(details)
+            logger.info("Invalid input or output error: Missing or invalid fields.")
             error_message = error_message + "\n" + extract_missing_pydantic_fields(response.error)
         case _:
             logger.error("Unexpected error: No missing fields found.")
-            error_message = error_message + "\n Details: \n" + str(response.error.details)
+            error_message = error_message + "\n in Function:" + str(function_name) + "\n Details: \n" + str(details) 
     return f"Error: {error_message}"
     
 def extract_missing_pydantic_fields(response: ErrorResponse) -> str:
@@ -72,8 +82,9 @@ def extract_missing_pydantic_fields(response: ErrorResponse) -> str:
     Returns a user-friendly string.
     """
     error_details = response.details
-    if not error_details or not isinstance(error_details, list):
-        return "Error de validación desconocido."
+    logger.error(f"Error details: {error_details}")
+    if not error_details or not isinstance(error_details, Iterable):
+        return "No missing or invalid fields found."
     missing_fields = []
     for field in error_details:
         if isinstance(field, dict):
@@ -89,7 +100,9 @@ def handle_internal_server_error_response(response: DiagnosisResponse) -> str:
     Handle the internal server error response from the transcription function.
     """
     error = response.error
-    error_message = error.message + "\n in Function: " + error.function + "\n Details: \n" + str(error.details)
+    function_name = error.function if error.function else "Unknown function"
+    details = error.details if error.details else "No details available"
+    error_message = error.message + "\n in Function: " + str(function_name) + "\n Details: \n" + str(details)
     logger.error(f"Error message: {error_message}")
     return error_message
 
@@ -98,6 +111,8 @@ def handle_unexpected_error_response(response: DiagnosisResponse) -> str:
     Handle the unexpected error response from the transcription function.
     """
     error = response.error
-    error_message = error.message + "\n in Function: " + error.function + "\n Details: \n" + str(error.details)
+    function_name = error.function if error.function else "Unknown function"
+    details = error.details if error.details else "No details available"
+    error_message = error.message + "\n in Function: " + str(function_name) + "\n Details: \n" + str(details)
     logger.error(f"Error message: {error_message}")
     return error_message

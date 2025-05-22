@@ -20,14 +20,14 @@ def diagnose(request: MedicalInput) -> str:
     logger.debug(request)
     # Convertir el input a un string
     medical_info = info_parser(request)
-    logger.info(f"Información médica: {medical_info}")
+    logger.info(f"Medical info: {medical_info}")
     
     if not isinstance(medical_info, str):
         return {"error": "Invalid input format"}
     
     prompt = load_prompt(DIAGNOSIS_PROMPT_PATH, medical_info, MEDICAL_INPUT)
 
-    logger.info("Llamando a OpenAI para el diagnóstico...")
+    logger.info("Callin OpenAI to generate diagnostic...")
     try:
         response = client.chat.completions.create(
             model=GPT_MODEL,
@@ -35,7 +35,7 @@ def diagnose(request: MedicalInput) -> str:
             temperature=0.7
         )
     except Exception as e:
-        logger.error(f"Error al llamar a OpenAI: {e}")
+        logger.error(f"Error calling OpenAI: {e}")
         return {
             "error": OpenAIError.__name__,
             "function": diagnose.__name__,
@@ -43,11 +43,11 @@ def diagnose(request: MedicalInput) -> str:
         }
     logger.debug("response")
     logger.debug(response.choices[0].message.content)
-    logger.info("Diagnóstico generado")
+    logger.info("Diagnostic generated successfully")
     try:
         response = json.loads(response.choices[0].message.content)
     except json.JSONDecodeError as e:
-        logger.error(f"Error al decodificar la respuesta JSON: {e}")
+        logger.error(f"Error when decoding JSON: {e}")
         return {
             "error": JsonDecodeError.__name__,
             "function": diagnose.__name__,
@@ -67,7 +67,7 @@ def info_parser(info: MedicalInput) -> str:
     reason_for_visit = info.reason_for_visit
     # Convertir el input a un string
     info_str = f"""
-    Paciente de {patient_details.age} años, de genero {patient_details.gender}, presenta los siguientes síntomas: {', '.join(symptoms)}.
-    Motivo de la visita: {reason_for_visit}.
+    Patient of {patient_details.age} years old, gender {patient_details.gender}, presents the following symptoms: {', '.join(symptoms)}.
+    Reason for visit: {reason_for_visit}.
     """
     return info_str

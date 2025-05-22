@@ -14,13 +14,13 @@ logger = setup_logger(__name__)
 @validate_output(MedicalInput)
 def extract(request: AudioTranscriptionOutput) -> MedicalInput:
     """
-    Usa el modelo de OpenAI para extraer datos clínicos estructurados desde texto libre.
+    Extracts clinical data from the text using OpenAI's GPT model.
     """
     text = request.model_dump().get("text")
-    logger.info(f"Texto recibido: {text}")
+    logger.info(f"Received text: {text}")
     prompt = load_prompt(EXTRACT_PROMPT_PATH, text, TEXTO_CLINICO)
     logger.info(f"Prompt: {prompt}")
-    logger.info("Llamando a OpenAI para la extracción de datos clínicos...")
+    logger.info("Calling OpenAI to extract clinical data...")
     try:
         response = client.chat.completions.create(
             model=GPT_MODEL,
@@ -30,7 +30,7 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
             max_tokens=800
         )
     except Exception as e:
-        logger.error(f"Error al llamar a OpenAI: {e}")
+        logger.error(f"Error calling OpenAI: {e}")
         return {
             "error": OpenAIError.__name__,
             "function": extract.__name__,
@@ -42,7 +42,7 @@ def extract(request: AudioTranscriptionOutput) -> MedicalInput:
     try:
         response = json.loads(response.choices[0].message.content)
     except json.JSONDecodeError as e:
-        logger.error(f"Error al decodificar la respuesta JSON: {e}")
+        logger.error(f"Error decoding JSON: {e}")
         return {
             "error": JsonDecodeError.__name__,
             "function": extract.__name__,
