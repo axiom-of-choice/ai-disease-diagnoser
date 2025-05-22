@@ -1,41 +1,112 @@
-# Descripcion del proyecto
+# Proyect description
 
-Este proyecto permite a un usuario ingresar un enlace de audio o escribir texto libre con información médica. Luego, utiliza funciones serverless en Google Cloud para transcripción, extracción estructurada de datos médicos y generación de diagnóstico, todo con una interfaz web simple en Streamlit.
+This project enables a user to insert an audio file url or write plain text with personal information and syntomps. 
+Then use Google Cloud serverless functions to perform a transcript (if needed), extract structured and relevant data about the patient and its symptoms, and perform a diagnose.
 
 ---
 
-# 🔧 Requisitos
+# 🔧 Requirements
 
-- Python 3.10 o superior
-- Cuenta de Google Cloud con `gcloud` CLI instalado y configurado
-- API Key de OpenAI
-- Opcional: cuenta de Whisper API o Google Speech-to-Text
-
+- Python 3.11.9
+- Google Cloud account with `gcloud` CLI installed and configured. Also firebase.
+- Open AI API Key 
 ---
 
 # 📁 Estructura del Proyecto
 
+This project is basically divided into two main components that could be decoupled into microservices (primarili the frontend).
+* Frontend:
+It is a streamlit app that bascially offers to the user to put an audio url or plain text (audio url preferred) and serves the endpoint so when the user submits, sends the requests and shows the response, either a successsful or unsuccessful in a friendly way.
+* Backend:
+It is a set of modules containing all the logic and endpoints to transcribe, extract and diagnose served in a API way.
 
+## Details about the structure:
 
+La siguiente es una vista general de la estructura de carpetas y archivos que compone el proyecto:
 
+```
+/ai-disease-diagnoser
+├── README.md
+├── frontend
+│   ├── .streamlit
+│      └── config.toml       # Config of streamlit
+│
+│   ├── common              # Package of common modules. Can be decoupled as external library.
+│     ├── __init__.py       # No description needed
+│     ├── config.py         # Basic configs
+│     ├── exceptions.py     # Exceptions module
+│     ├── response_adapters.py # Adapters for displaying the API response in a friendly way
+│     └── schemas.py        # Schemas modules for validation
+│
+│   ├── tests               # Tests folder
+│      ├── # Left some generic ones.
+│
+│   ├── .dockerignore       # # No description needed
+│   ├── Dockerfile          # File to build the docker image (if needed)   
+│   ├── app.py              # Simple app definition
+│   └── requirements.txt    # No description needed
+│
+├── functions               # Backend package. The name functions is needed due to firebase functions constraints.
+│
+│   ├── common              # Package of common modules. Can be decoupled as external library.
+│     ├── __init__.py       # No description needed
+│     ├── decorators.py     # Basic configs
+│     ├── exceptions.py     # Exceptions module
+│     ├── utils.py          # Utils
+│     ├── openai_client.py  # Singleton client
+│     ├── firestore_utils.py # Utils to write to firestore
+│     └── schemas.py        # Schemas modules for validation
+│
+│   ├── diagnoser           # Module of diagnoser logic
+│     ├── __init__.py       # No description needed
+│     ├── main.py           # Core logic
+│     └── prompt.txt        # Customizable prompt. Can be decoupled to avoid touching code when changing
+│
+│   ├── extractor           # Module of extractor logic
+│     ├── __init__.py       # No description needed
+│     ├── main.py           # Core logic
+│     └── prompt.txt        # Customizable prompt. Can be decoupled to avoid touching code when changing
+│
+│   ├── transcriber         # Module of transciber logic
+│     ├── __init__.py       # No description needed
+│     └── main.py           # Core logic
+│
+│   ├── tests               # Tests folder
+│      ├── # Left some generic ones.
+│
+│   ├── main.py             # Main file containing endpoint definitions and orchestrator function (explained later)  
+│   ├── __init__.py         # No description needed
+│   ├── .gitignore          # No description needed
+│   ├── .env                # Important file to add your environment variables.
+│   ├── config.py           # Basic configurations file 
+│   ├── requirements_test.txt  # No description needed
+│   └── requirements.txt    # No description needed
+│
+├── .gitignore              # No description needed
+├── firebase.json           # Functions config
+└── LICENSE                 # No description needed
+```
 
 ---
 
-# ⚙️ Configuración y Despliegue
+# ⚙️ Configurations and deploy
 
 ## 1. Autenticarse con Google Cloud
 
 ```
-gcloud auth login
+Install firebase CLI y log in 
 gcloud config set project TU_ID_DEL_PROYECTO
 ```
 
-## 2. Configurar API Key de OpenAI
+## 2. Config Open AI APi Key
 
-Agrega tu clave en extract_medical_info/main.py y generate_diagnosis/main.py:
-openai.api_key = "TU_API_KEY"
+Add you API key into .env file
 
-## 3. Desplegar las Cloud Functions
+## 3. Run functions locally
+
+```
+firebase emulators:start --only functions,hosting
+```
 
 ### Función 1: Transcripción
 ```
@@ -67,18 +138,17 @@ gcloud functions deploy generate_diagnosis \\
   --region us-central1
 ```
 
-## 4. Ejecutar la interfaz Streamlit
+## 4. Run streamlit app
 ```
-cd medic_app/frontend
-pip install streamlit requests
-streamlit run streamlit_app.py
+pip install -r frontend/requirements.txt
+streamlit run forntend/app.py
 ```
 
 # 🧪 Ejemplo de uso
 
 ## Entrada (en frontend):
-* Opción 1: https://mis-audios.com/audio_paciente_1.mp3
-* Opción 2: Texto: "Me llamo Juan Pérez, tengo 45 años, siento dolor en el pecho desde hace dos días..."
+* Opción 1: https://audiourl.something
+* Opción 2: Texto: "My name is NAME i am GENDER i have YY years and i feel..."
 
 
 
@@ -89,11 +159,11 @@ streamlit run streamlit_app.py
     "resultado": "Diagnóstico: Angina de pecho... Tratamiento: Reposo, nitroglicerina... Recomendaciones: Evitar esfuerzos..."
 }
 ```
-
+# High level functionality
 
 
                                       ┌─────────────┐
-                                      │  Usuario    │
+                                      │     User    │
                                       └────┬────────┘
                                            │
                           ┌────────────────┴───────────────┐
@@ -103,7 +173,7 @@ streamlit run streamlit_app.py
                                            │
                       ┌────────────────────┼────────────────────────┐
                       ▼                    ▼                        ▼
-       [Audio URL o Texto]        [Ver resultados]       [Mostrar errores/logs]
+       [Audio URL or Text]        [See results ]       [Show errors/logs]
                                            │
                                 ┌──────────▼────────────┐
                                 │   Firebase Functions  │
@@ -111,12 +181,12 @@ streamlit run streamlit_app.py
                                 └──────────┬────────────┘
                                            ▼
     ┌─────────────┐ ┌──────────────────────┐ ┌────────────────────────┐
-    │ Transcribe  │→│ Extraer Información  │→│ Generar Diagnóstico     │
+    │ Transcribe  │→│ Exttract data        │→│ Generate diagnostic    │
     └─────────────┘ └──────────────────────┘ └────────────────────────┘
-        (Whisper)        (OpenAI / Gemini)         (OpenAI / Gemini)
+      (Open AI)        (OpenAI / Gemini)         (OpenAI / Gemini)
                                │                          │
                      ┌────────▼────────┐       ┌──────────▼────────────┐
-                     │   JSON Schema   │       │ Texto estructurado    │
+                     │   JSON Schema   │       │ Structured Text       │
                      └─────────────────┘       └───────────────────────┘
 
 
