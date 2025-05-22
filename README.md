@@ -157,7 +157,6 @@ You should be able to see something like this if everything went good.
 ![image](public/Screenshot%202025-05-22%20at%2010.25.33 a.m..jpg)
 
 # 🧪 Sample use case.
-![Alt Text](public/Usage.mp4)
 
 ## Option 1: https://audiourl.something:
 ### Output
