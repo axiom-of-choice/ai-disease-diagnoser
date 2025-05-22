@@ -1,0 +1,37 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "python311"
+  },
+  "hosting": {
+    "public": "public",
+    "rewrites": [
+      {
+      "source": "/api/transcribe",
+      "function": "transcribe_audio"
+      },
+      {
+        "source": "/api/extract",
+        "function": "extract_medical_info"
+      },
+      {
+        "source": "/api/diagnose",
+        "function": "generate_diagnose"
+      },
+      {
+        "source": "/api/process",
+        "function": "process_medical_data"
+      },
+      {
+        "source": "/health",
+        "function": "health"
+      },
+      { "source": "**", "function": "not_found" }
+    ]
+  }
+}

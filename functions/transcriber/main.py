@@ -1,0 +1,78 @@
+from common.utils import get_file_extension, validate_extension
+from config import setup_logger, TMP_FOLDER, TRANSCRIBE_MODEL
+import functions_framework
+from common.schemas import AudioTranscriptionInput, AudioTranscriptionOutput
+from common.utils import write_file, generate_uuid
+from common.decorators import validate_input, validate_output
+import requests
+from typing import Dict
+from common.openai_client import client
+import os
+from common.exceptions import DownloadFileError, InvalidFileExtensionError, InvalidAudioFormatError, TranscriptionError
+
+
+
+logger = setup_logger(__name__)
+
+@functions_framework.http
+@validate_input(AudioTranscriptionInput)
+def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
+    audio_url = request.model_dump().get("audio_url")
+    response = requests.get(audio_url)
+    if response.status_code != 200:
+        logger.error(f"Failed to download audio file: {response.status_code}")
+        return {
+                "error": DownloadFileError.__name__,
+                "function": transcribe.__name__,
+                "details": response.text
+                }
+    
+    logger.info(f"Downloaded audio file from URL: {audio_url}")
+    extension = get_file_extension(response.headers.get("Content-Type"))
+    logger.info(f"File extension determined: {extension}")
+    if not extension:
+        logger.error("Could not determine file extension from Content-Type header")
+        return {
+                "error": InvalidFileExtensionError.__name__,
+                "function": transcribe.__name__,
+                "details": extension
+                }
+    if not validate_extension(extension):
+        return {
+                "error": InvalidAudioFormatError.__name__,
+                "function": transcribe.__name__,
+                "details": extension
+        }
+    logger.info(f"Transcribing audio from URL: {audio_url}")
+    filename = generate_uuid()
+    file_path = f"{TMP_FOLDER}{filename}.{extension}"
+    write_file(file_path, response.content)
+    logger.info("Transcribing audio...")
+    result = transcribe_audio(file_path)
+    os.unlink(file_path)  # Clean up the temporary file
+    logger.info(f"Transcription result: {result}")
+    return result
+
+@validate_output(AudioTranscriptionOutput)
+def transcribe_audio(filepath: str) -> Dict[str, str]:
+    """
+    Transcribe audio file to text using OpenAI's Whisper model.
+    """
+    logger.info(f"Reading audio file from: {filepath}")
+    with open(filepath, "rb") as audio_file:
+        logger.info("Transcribing audio...")
+        try:
+            response = client.audio.transcriptions.create(
+                model=TRANSCRIBE_MODEL,
+                file=audio_file
+            )
+        except Exception as e:
+            logger.error(f"Error during transcription: {e}")
+            return {
+                "error": TranscriptionError.__name__,
+                "function": transcribe_audio.__name__,
+                "details": str(e)
+            }
+        
+    # response = AudioTranscriptionOutput.model_validate(response.model_dump())
+    return response.model_dump()
