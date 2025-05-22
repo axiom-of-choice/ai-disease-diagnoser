@@ -3,6 +3,8 @@
 This project enables a user to insert an audio file url or write plain text with personal information and syntomps. 
 Then use Google Cloud serverless functions to perform a transcript (if needed), extract structured and relevant data about the patient and its symptoms, and perform a diagnose.
 
+![Alt Text](public/Full_usage.gif)
+
 # Table of contents
 1. [Requirements](#-requirements)
 2. [Project Structure](#-project-structure)
