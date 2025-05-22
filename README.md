@@ -12,7 +12,7 @@ Then use Google Cloud serverless functions to perform a transcript (if needed), 
 - Open AI API Key 
 ---
 
-# 📁 Estructura del Proyecto
+# 📁 Project structure
 
 This project is basically divided into two main components that could be decoupled into microservices (primarili the frontend).
 * Frontend:
@@ -22,7 +22,7 @@ It is a set of modules containing all the logic and endpoints to transcribe, ext
 
 ## Details about the structure:
 
-La siguiente es una vista general de la estructura de carpetas y archivos que compone el proyecto:
+General view of the project structure
 
 ```
 /ai-disease-diagnoser
@@ -91,7 +91,7 @@ La siguiente es una vista general de la estructura de carpetas y archivos que co
 
 # ⚙️ Configurations and deploy
 
-## 1. Autenticarse con Google Cloud
+## 1. Auth Google Cloud
 
 ```
 Install firebase CLI y log in 
