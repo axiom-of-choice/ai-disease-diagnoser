@@ -1,27 +1,24 @@
 From the following clinical text, extract the information in the specified JSON format.
-
 Text:
-
 CLINICAL_TEXT
-
 
 Return a JSON object with the following structure:
 
 {
   "patient": {
-    "name": "Full name of the patient, if available",
-    "age": "Patient's age in years, if available",
+    "name": "Name, if available",
+    "age": "Age in years, if available",
     "id": "Identification number, if provided",
     "gender": "Male, Female, or Other, if indicated"
   },
-  "reason_for_visit": "Brief description of the main reason for the patient's visit, if available and clear.",
+  "reason_for_visit": "Brief description of the main reason for the patient's visit, if available. If not, make one with the symptoms.",
   "symptoms": [
     "List of symptoms reported or identified in the text, in standardized medical language, if available and clear."
   ]
 }
 
 Rules:
-Do not invent information that is not clearly stated in the text.
+Do not assume information that is not clearly stated in the text.
 If a field is not available, leave it as null.
 Use clear and precise language, avoid redundancies.
 List only symptoms, not diagnoses.

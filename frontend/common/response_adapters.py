@@ -40,17 +40,18 @@ def handle_success_response(response: DiagnosisResponse) -> str:
     """
     Handle the success response from the transcription function.
     """
+    diagnosis_report: dict = response.diagnosis_report
+    extacted_info: dict = response.extracted_info
     text_combined = f"""
-    Hello! {response.extracted_info.get("patient").get("name")}, I am the AI medic assistant. \n
+    Hello! {extacted_info.get("patient").get("name")}, I am the AI medic assistant.
     Based on the information you provided, I have generated a report. \n
-    Patient information: \n
-    Name: {response.extracted_info.get("patient").get("name")} \n
-    Age: {response.extracted_info.get("patient").get("age")} \n
-    Gender: {response.extracted_info.get("patient").get("gender")} \n
-    Symptoms: {response.extracted_info.get("symptoms")} \n
-    Diagnosis: {response.extracted_info.get("diagnosis")} \n
-    Treatment: {response.extracted_info.get("treatment")} \n
-    Recommendations: {response.extracted_info.get("recommendations")} \n
+    Name: {extacted_info.get("patient").get("name")} \n
+    Age: {extacted_info.get("patient").get("age")} \n
+    Gender: {extacted_info.get("patient").get("gender")} \n
+    Symptoms: {extacted_info.get("symptoms")} \n
+    Diagnosis: {diagnosis_report.get("diagnostic")} \n
+    Treatment: {diagnosis_report.get("treatment")} \n
+    Recommendations: {diagnosis_report.get("recommendations")} \n
     """
     return text_combined
     
@@ -72,7 +73,7 @@ def handle_bad_request_response(response: DiagnosisResponse) -> str:
             error_message = error_message + "\n" + extract_missing_pydantic_fields(response.error)
         case _:
             logger.error("Unexpected error: No missing fields found.")
-            error_message = error_message + "\n Details: \n" + str(details)
+            error_message = error_message + "\n in Function:" + str(function_name) + "\n Details: \n" + str(details) 
     return f"Error: {error_message}"
     
 def extract_missing_pydantic_fields(response: ErrorResponse) -> str:

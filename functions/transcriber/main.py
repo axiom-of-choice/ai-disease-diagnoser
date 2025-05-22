@@ -20,7 +20,7 @@ def transcribe(request: AudioTranscriptionInput) -> Dict[str, str]:
     audio_url = request.model_dump().get("audio_url")
     response = requests.get(audio_url)
     if response.status_code != 200:
-        logger.error(f"Failed to download audio file: {response.status_code}")
+        logger.error(f"Failed to download audio file: {response}")
         return {
                 "error": DownloadFileError.__name__,
                 "function": transcribe.__name__,

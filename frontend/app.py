@@ -23,13 +23,19 @@ if option == "Audio Link":
             if response.status_code != 200:
                 st.error(f"Error processing audio: {response.status_code}")
                 st.error(result)
+                with st.expander("View full JSON response for advanced users"):
+                    st.json(response.json())
                 st.stop()
             st.success("Audio processed successfully")
             st.text(result)
+            with st.expander("View full JSON response for advanced users"):
+                st.json(response.json())
         except requests.exceptions.RequestException as e:
             st.error(f"Error processing the audio: {e}")
             st.text(result)
             logger.error(f"Error processing the audio: {e}")
+            with st.expander("View full JSON response for advanced users"):
+                    st.json(response.json())
             st.stop()
 else:
     texto_libre = st.text_area("Write the free text")
@@ -43,10 +49,16 @@ else:
             if response.status_code != 200:
                 st.error(f"Error processing text: {response.status_code}")
                 st.error(result)
+                with st.expander("View full JSON response for advanced users"):
+                    st.json(response.json())
                 st.stop()
             st.success("Text processed successfully")
             st.text(result)
+            with st.expander("View full JSON response for advanced users"):
+                    st.json(response.json())
         except requests.exceptions.RequestException as e:
             logger.error(f"Error processing text: {e}")
             st.error(result)
+            with st.expander("View full JSON response for advanced users"):
+                    st.json(response.json())
             st.stop()
